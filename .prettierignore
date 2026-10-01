@@ -1,0 +1,7 @@
+.nuxt
+.output
+node_modules
+pnpm-lock.yaml
+shared/types/api.d.ts
+PLAN.md
+BACKEND_PROMPT.md
