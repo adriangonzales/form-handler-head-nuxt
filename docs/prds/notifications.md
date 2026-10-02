@@ -1,6 +1,6 @@
 # PRD: Notifications
 
-**Status:** Planned (milestone 7) · **Owner area:** `app/pages/forms/[id]/notifications.vue`, `app/components/notifications/NotificationList.vue`, `app/components/notifications/NotificationForm.vue`, `app/composables/useNotifications.ts`
+**Status:** Built (milestone 7, 2026-10-01) · **Owner area:** `app/pages/forms/[id]/notifications.vue`, `app/components/notifications/NotificationForm.vue`, `app/composables/useNotifications.ts`, `app/utils/notifications.ts`
 
 ## 1. Summary
 
@@ -72,6 +72,8 @@ _API Notifications_ FR-1 (paginated list), FR-3 (type/value validation, E.164 fo
 - **No SMS delivery** in the API.
 - **No way to send a test alert** to a recipient without submitting an entry.
 - **Bounce reporting only works with Postmark** as the API's mailer.
+- **The list has a fixed page size of 15:** the notifications index doesn't take `per_page`.
+- **Delivery errors are shown under the recipient, not in a tooltip** (FR-1). A tooltip hides the message from touch and keyboard users, and the full text is what makes the problem fixable.
 
 ## 8. Open questions
 

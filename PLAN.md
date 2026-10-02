@@ -89,7 +89,7 @@ form-handler-head-nuxt/
 │  │  ├─ forms/       FormTable, FormSettingsForm, SchemaBuilder, SchemaFieldRow, EmbedSnippet, TestSubmit
 │  │  ├─ entries/     EntryFilters, EntryBulkBar, EntryDetail, ExportButton
 │  │  ├─ exports/     ExportList (shared by the Entries popover and /exports)
-│  │  ├─ notifications/ NotificationList, NotificationForm
+│  │  ├─ notifications/ NotificationForm
 │  │  └─ ui/          ConfirmModal, Pagination, EmptyState, ApiErrorAlert
 │  ├─ composables/    useApi (typed $fetch wrapper), useForms, useEntries, useNotifications,
 │  │                  useExport (create → poll → download), useListQuery (sync filters/sort/page to URL)
@@ -184,7 +184,11 @@ Cross-cutting features:
    - **Shared code:** `utils/exports.ts` (filter summary, parameter comparison, poll delay), `ExportList`, `ExportStatus`, `ExportActions`.
    - **Tests:** 114 unit tests and 41 Playwright tests (5 for exports: the Starred CSV with schema headers and table order, the re-fetch on Download, a faked failure and Try again, expiry, and the Exports page across forms). **The export tests need the API's queue worker** (`php artisan queue:work`).
    - **API bug found and fixed:** `SendFormEntryAlerts` threw `Call to a member function notifications() on null` when the spam check finished for an entry whose form was deleted. Fixed in the API (`3917b21`, "Handle soft deleted forms"): alerts are skipped for deleted forms.
-7. **Notifications.** CRUD, enable toggle, bounce/error display.
+7. ✅ **Notifications** (built 2026-10-01).
+   - **Recipients list** (`pages/forms/[id]/notifications.vue`): type icon and value, delivery status ("Delivery problem" badge with the full error shown under the recipient, or "Not delivered yet" for SMS), an optimistic Enabled switch that sends `type`, `value` and `enabled` as the API requires, Edit, and Remove with Undo. Paginated at the API's fixed 15. Help text on when alerts are sent, with the form's timezone and a link to Settings.
+   - **Add / edit** (`NotificationForm`, a modal via `useOverlay`): Email or SMS, value, Enabled. Checked in the browser like the API (email, or E.164 for SMS, with a hint about the country code); phone numbers lose spaces, dashes and brackets on blur, and `00` becomes `+`. SMS shows a notice that it isn't delivered yet. 422s map onto the fields.
+   - **Errors are shown inline rather than in a tooltip** (the PRD asked for a tooltip), so the full message is readable on touch screens and with a keyboard.
+   - **Tests:** 119 unit tests and 46 Playwright tests (5 for notifications: add and edit, E.164 checks, the API's 422, enable/disable and Remove/Undo persisting, and a faked bounce). AC-1 was checked by hand: a public submission's alert reached the API's `log` mailer once the queue worker ran.
 8. **Account.** Profile, password change (token swapped in the session), delete account.
 9. **Polish and tests.** Empty and error states, accessibility pass, Playwright happy paths for each milestone, and a README.
 
