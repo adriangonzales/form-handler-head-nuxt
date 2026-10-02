@@ -26,7 +26,7 @@ test('signing in returns to the requested page and survives a reload', async ({ 
   await page.reload()
   await expect(page).toHaveURL('/account')
   await page.goto('/forms')
-  await expect(page.getByText(/You have \d+ forms?/)).toBeVisible()
+  await expect(page.getByRole('link', { name: 'New form' }).first()).toBeVisible()
 })
 
 test('the API token never reaches the browser', async ({ page }) => {
@@ -56,7 +56,7 @@ test('parallel requests share one token refresh', async ({ page }) => {
   expect(responses.map((response) => response.status())).toEqual(Array(10).fill(200))
 
   await page.reload()
-  await expect(page.getByText(/You have \d+ forms?/)).toBeVisible()
+  await expect(page.getByRole('link', { name: 'New form' }).first()).toBeVisible()
 })
 
 test('a server-rendered page passes a refreshed session cookie to the browser', async ({

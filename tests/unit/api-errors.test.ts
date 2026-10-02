@@ -43,3 +43,11 @@ describe('toFormErrors', () => {
     })
   })
 })
+
+describe('toFormErrors with list fields', () => {
+  it('assigns an error on a list item to the list field', () => {
+    expect(
+      toFormErrors({ 'settings.domains.1': ['Not a hostname.'] }, ['settings.domains']).fieldErrors,
+    ).toEqual([{ name: 'settings.domains', message: 'Not a hostname.' }])
+  })
+})

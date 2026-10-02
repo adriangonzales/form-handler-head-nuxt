@@ -33,7 +33,8 @@ export function toApiError(error: unknown): ApiError {
 
 /**
  * Splits 422 errors into errors for fields the form has (for `UForm.setErrors`) and messages for
- * anything else, which the form shows in an alert.
+ * anything else, which the form shows in an alert. Errors on list items (`settings.domains.2`) go to
+ * the list's field.
  */
 export function toFormErrors(
   errors: Record<string, string[]>,
@@ -49,8 +50,11 @@ export function toFormErrors(
       continue
     }
 
-    if (fieldNames.includes(name)) {
-      fieldErrors.push({ name, message })
+    // `settings.domains.2` belongs to the `settings.domains` field.
+    const field = fieldNames.find((field) => name === field || name.startsWith(`${field}.`))
+
+    if (field) {
+      fieldErrors.push({ name: field, message })
     } else {
       otherMessages.push(message)
     }

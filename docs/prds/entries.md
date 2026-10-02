@@ -42,7 +42,7 @@ Entries are submissions to a form. The **Entries** tab is an inbox for one form.
 
 **FR-3 Filters.**
 
-- **Status tabs:**
+- **Status tabs**, kept in the URL as `?status=inbox|unread|starred|spam|trash` (default `inbox`). The forms list links to `?status=unread` and `?status=spam`:
   - **Inbox:** not spam, not deleted (`filter[spam]=false`);
   - **Unread:** `filter[read]=false&filter[spam]=false`;
   - **Starred:** `filter[starred]=true`;

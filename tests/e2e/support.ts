@@ -16,3 +16,53 @@ export async function signIn(page: Page, path = '/forms') {
   await page.getByRole('button', { name: 'Sign in' }).click()
   await expect(page).toHaveURL(path)
 }
+
+export const apiPublicBase = process.env.NUXT_PUBLIC_API_PUBLIC_BASE ?? 'http://localhost:8001/api'
+
+export interface CreatedForm {
+  id: string
+  name: string
+  active: boolean
+}
+
+/** Creates a form through the dashboard's proxy (the page must be signed in). */
+export async function createFormViaApi(
+  page: Page,
+  name: string,
+  body: Record<string, unknown> = {},
+): Promise<CreatedForm> {
+  const response = await page.request.post('/api/v1/forms', { data: { name, ...body } })
+
+  expect(response.status(), await response.text()).toBe(201)
+
+  return (await response.json()).data
+}
+
+export async function deleteFormViaApi(page: Page, id: string) {
+  await page.request.delete(`/api/v1/forms/${id}`)
+}
+
+export function uniqueName(prefix: string) {
+  return `${prefix} ${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+}
+
+declare global {
+  interface Window {
+    useNuxtApp?: () => { isHydrating?: boolean }
+  }
+}
+
+async function hydrated(page: Page) {
+  await page.waitForFunction(() => window.useNuxtApp?.().isHydrating === false)
+}
+
+/** Navigates and waits for hydration, so the next click reaches Vue rather than static HTML. */
+export async function goto(page: Page, url: string) {
+  await page.goto(url)
+  await hydrated(page)
+}
+
+export async function reload(page: Page) {
+  await page.reload()
+  await hydrated(page)
+}

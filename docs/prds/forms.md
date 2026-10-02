@@ -1,6 +1,6 @@
 # PRD: Forms
 
-**Status:** Planned (milestone 3) · **Owner area:** `app/pages/forms/index.vue`, `app/pages/forms/new.vue`, `app/pages/forms/[id].vue`, `app/pages/forms/[id]/settings.vue`, `app/components/forms/FormTable.vue`, `app/components/forms/FormSettingsForm.vue`, `app/composables/useForms.ts`, `app/composables/useListQuery.ts`
+**Status:** Built (milestone 3, 2026-10-01) · **Owner area:** `app/pages/forms/index.vue`, `app/pages/forms/new.vue`, `app/pages/forms/[id].vue`, `app/pages/forms/[id]/settings.vue`, `app/composables/useForms.ts`, `app/composables/useListQuery.ts`, `app/utils/listQuery.ts`, `app/utils/formSettings.ts`, `app/utils/formTemplates.ts`
 
 ## 1. Summary
 
@@ -44,7 +44,7 @@ The forms list is the dashboard's home. From it, account holders see every form 
   - **Blank**;
   - **Contact:** name (required), email (required, email) and message (required, max 5000);
   - **Newsletter:** email (required, email).
-- Templates fill in `schema`.
+- Templates fill in `schema`, with a fresh ULID as each field's ID and the readable input names (`name`, `email`, `message`) as `name`.
 - It submits `POST /v1/forms`. On 201 it goes to the new form's **Integrate** tab with a toast: "Form created. It's inactive until you turn it on."
 - New forms are inactive by default (_API Forms FR-3_).
 

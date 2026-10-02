@@ -54,8 +54,8 @@ Browser ──(sealed session cookie)──▶ Nuxt / Nitro server ──(Bearer
 | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
 | Project scaffold, config from `.env`, generated API types, lint/format/typecheck/test tooling | Built (milestone 1)                                                               |
 | Login, session, token refresh, route protection, password reset                               | Built (milestone 2)                                                               |
-| Form management                                                                               | Planned (milestone 3)                                                             |
-| Schema builder, embed snippets, test submit                                                   | Planned (milestone 4)                                                             |
+| Form management                                                                               | Built (milestone 3)                                                               |
+| Schema builder, embed snippets, test submit                                                   | Built (milestone 4)                                                               |
 | Entry inbox and triage                                                                        | Planned (milestone 5)                                                             |
 | CSV export                                                                                    | Planned (milestone 6). API support built                                          |
 | Notification recipients                                                                       | Planned (milestone 7)                                                             |
