@@ -1,6 +1,6 @@
 # PRD: App Shell & Architecture
 
-**Status:** Partially built. The scaffold, configuration, API types and tooling are built (milestone 1); the proxy, layouts and shared UI are planned · **Owner area:** `nuxt.config.ts`, `server/api/v1/[...path].ts`, `server/utils/*`, `app/layouts/*`, `app/error.vue`, `app/composables/useApi.ts`, `app/utils/apiErrors.ts`, `shared/types/*`, `scripts/generate-api-types.mjs`
+**Status:** Built (milestones 1–2, polished in milestone 9, 2026-10-01) · **Owner area:** `nuxt.config.ts`, `server/api/v1/[...path].ts`, `server/utils/*`, `app/layouts/*`, `app/error.vue`, `app/plugins/api.ts`, `app/assets/css/main.css`, `app/utils/apiErrors.ts`, `shared/types/*`, `scripts/generate-api-types.mjs`
 
 ## 1. Summary
 
@@ -50,7 +50,7 @@ This PRD covers the foundation every feature builds on:
 - The proxy calls the API through its public URL, because the API builds signed export links from the host it sees ([Entry Exports](entry-exports.md)).
 - If production routes server-to-server traffic through an internal address, the proxy must send `X-Forwarded-Host` and `X-Forwarded-Proto` instead. The API trusts these headers (`config/trustedproxy.php`).
 
-**FR-5 Typed client.** Pages call the proxy through `useApi()`, a typed wrapper whose paths, params and bodies come from the generated types. Server code calls Laravel through an `openapi-fetch` client (`server/utils/laravel.ts`).
+**FR-5 Typed client.** Pages call the proxy through `$api` (`app/plugins/api.ts`), from composables per area (`useForms`, `useEntries`, …) that type each request and response with the generated types' short names in `models.ts`. Server code calls Laravel through an `openapi-fetch` client (`server/utils/laravel.ts`).
 
 **FR-6 Layouts and navigation.**
 
@@ -64,7 +64,7 @@ This PRD covers the foundation every feature builds on:
 
 **FR-7 Form tabs.** `/forms/[id]` has the tabs **Entries** (default), **Fields**, **Settings**, **Notifications** and **Integrate**. Each tab is its own route, so it can be linked to and survives a reload. The form's name and active badge stay visible above the tabs.
 
-**FR-8 Loading states.** Lists and detail views show skeletons while loading. Buttons that trigger a change show a loading state and are disabled until the request settles, which prevents double submission.
+**FR-8 Loading states.** Pages render on the server with their data, so the first view never loads. After that, tables show a loading bar, and the entry slide-over (when opened from a link) and the Exports popover show skeletons. Buttons that trigger a change show a loading state and are disabled until the request settles, which prevents double submission.
 
 **FR-9 Toasts.**
 
@@ -94,14 +94,16 @@ This PRD covers the foundation every feature builds on:
   - Every interactive control can be reached and operated with the keyboard and has an accessible name.
   - Focus moves into modals and returns to the trigger when they close.
   - Colour isn't the only signal for state (read/unread, spam, errors).
+  - Text meets WCAG AA contrast in light and dark mode. Nuxt UI's default muted, placeholder and subtle-badge shades don't, so `main.css` adjusts them.
+  - Checked by `tests/e2e/accessibility.spec.ts`: an axe scan (WCAG 2.1 A/AA) of every screen in both modes and at 375 px, keyboard-only navigation of the layout, and modal focus.
 - **NFR-5 Responsiveness:** usable down to 375 px wide. Wide tables scroll horizontally inside their container, never the whole page.
 - **NFR-6 Theming:** light and dark mode through Nuxt UI colour mode. Primary colour `indigo`, neutral `zinc` (`app.config.ts`).
 
 ## 6. Acceptance criteria
 
 - **AC-1 (built):** `pnpm dev` serves the app on :3000, `pnpm check` passes, and `pnpm api:types` regenerates the types from the URL configured in `.env`.
-- **AC-2:** a 422 from any form puts each error on its field; a 404 shows the not-found page; a 401 sends the user to `/login` with a redirect back.
-- **AC-3:** the authenticated layout works at 375 px and with the keyboard alone.
+- **AC-2 (built):** a 422 from any form puts each error on its field; a 404 shows the not-found page; a 401 sends the user to `/login` with a redirect back.
+- **AC-3 (built):** the authenticated layout works at 375 px and with the keyboard alone.
 
 ## 7. API dependencies
 

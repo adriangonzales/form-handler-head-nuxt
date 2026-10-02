@@ -112,6 +112,8 @@ test('deleting the account needs the right password, then signs out for good', a
   await expect(page).toHaveURL(/\/login\?reason=account-deleted/)
   await expect(page.getByText('Your account has been deleted.')).toBeVisible()
   leftovers.pop()
+  // The modal's password input stays in the DOM until its closing transition ends.
+  await expect(dialog).toBeHidden()
 
   await page.getByLabel('Email').fill(account.email)
   await page.getByLabel('Password').fill(account.password)

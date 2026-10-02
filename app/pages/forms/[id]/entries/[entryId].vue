@@ -412,6 +412,14 @@ async function forceDelete() {
           { label: 'Retry', color: 'neutral', variant: 'outline', onClick: () => refresh() },
         ]"
       />
+      <!-- Opened from a link, before the entry has loaded (from the list it shows the row's copy). -->
+      <div v-else-if="loadStatus === 'pending'" class="space-y-6" aria-busy="true">
+        <span class="sr-only">Loading entry…</span>
+        <div v-for="index in 4" :key="index" class="space-y-2">
+          <USkeleton class="h-4 w-24" />
+          <USkeleton class="h-5 w-3/4" />
+        </div>
+      </div>
     </div>
   </div>
 </template>

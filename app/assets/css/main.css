@@ -1,2 +1,20 @@
 @import 'tailwindcss';
 @import '@nuxt/ui';
+
+/*
+ * Nuxt UI's default shades miss WCAG AA (4.5:1) for small text: muted text on elevated
+ * backgrounds (pill tabs, selected radio cards), placeholders, and subtle badges, whose text is
+ * the colour itself on a 10% tint of it. These darken them in light mode, and lighten the dimmed
+ * text (placeholders) in dark mode. Checked by `tests/e2e/accessibility.spec.ts`.
+ */
+:root:not(.dark) {
+  --ui-success: var(--ui-color-success-800);
+  --ui-warning: var(--ui-color-warning-800);
+  --ui-error: var(--ui-color-error-700);
+  --ui-text-dimmed: var(--ui-color-neutral-500);
+  --ui-text-muted: var(--ui-color-neutral-600);
+}
+
+.dark {
+  --ui-text-dimmed: var(--ui-color-neutral-400);
+}

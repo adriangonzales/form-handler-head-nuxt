@@ -7,6 +7,10 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  app: {
+    head: { htmlAttrs: { lang: 'en' } },
+  },
+
   // Values come from `.env` (see `.env.example`), which Nuxt loads before reading this file. The
   // same NUXT_* variables still override them at runtime in production.
   runtimeConfig: {
