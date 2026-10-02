@@ -88,7 +88,7 @@ Entries are submissions to a form. The **Entries** tab is an inbox for one form.
 
 **FR-9 Automatic spam classification.** After each public submission the API checks it for spam in the background. It's an AI classifier (Jev): entries scored at a 0.9 likelihood or above are flagged, with the reason "Jev classified this entry as spam." Alerts are only sent after the check (_API Entries FR-1a_). The dashboard reflects this as follows:
 
-- **Likelihood:** `spam_score` is a probability from 0 to 1, serialised as a string (`"0.950"`). It's shown as a percentage ("95% likely spam"), not a raw score. Sorting by spam score sorts by this likelihood.
+- **Likelihood:** `spam_score` is a probability from 0 to 1, serialised as a number (`0.95`). It's shown as a percentage ("95% likely spam"), not a raw score. Sorting by spam score sorts by this likelihood.
 - **Check state (`spam_checked_at`):**
   - **Checked:** `spam_checked_at` is set. The detail view shows "Checked {time}" next to the likelihood. Honeypot hits are marked checked when they arrive, with the honeypot reason and no likelihood shown.
   - **Checking:** `spam_checked_at` is null and the entry is less than 2 minutes old. The row shows a subtle "Checking…" badge, and the detail view says the entry may still move to Spam and that alerts go out once the check finishes.
@@ -119,7 +119,7 @@ Entries are submissions to a form. The **Entries** tab is an inbox for one form.
 
 ## 7. API dependencies
 
-_API Entries_ FR-1a (Jev spam classification, threshold 0.9, `spam_checked_at`, alerts after the check), FR-2 (list, sort, filters, `per_page` 1–100 with a default of 15, oldest-first default), FR-3/FR-4 (show and update; submission fields are read-only), FR-5 (response shape: `spam_score` is a string, `user_agent_display` an object or null), FR-6 (delete, restore, force delete only for deleted entries), FR-7 (bulk actions and `affected`). Entries of a deleted form return 403.
+_API Entries_ FR-1a (Jev spam classification, threshold 0.9, `spam_checked_at`, alerts after the check), FR-2 (list, sort, filters, `per_page` 1–100 with a default of 15, oldest-first default), FR-3/FR-4 (show and update; submission fields are read-only), FR-5 (response shape: `spam_score` is a number, `user_agent_display` an object or null), FR-6 (delete, restore, force delete only for deleted entries), FR-7 (bulk actions and `affected`). Entries of a deleted form return 403.
 
 ## 8. Gaps
 

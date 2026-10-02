@@ -1,7 +1,8 @@
-import type { FormEntryExport, FormEntryQuery } from '#shared/types/models'
+import type { FormEntryExport } from '#shared/types/models'
 import { entrySorts } from './entries'
 
-export type ExportParameters = Pick<FormEntryQuery, 'filter' | 'sort'>
+/** The filters and sort an export is created with, as the export endpoint takes and returns them. */
+export type ExportParameters = FormEntryExport['parameters']
 
 export const exportStatuses = {
   pending: { label: 'Preparing export…', color: 'neutral' },
@@ -31,10 +32,7 @@ export function exportParameters(apiQuery: Record<string, string | number>): Exp
     }
   }
 
-  return {
-    filter: filter as ExportParameters['filter'],
-    sort: apiQuery.sort as ExportParameters['sort'],
-  }
+  return { filter, sort: apiQuery.sort === undefined ? undefined : String(apiQuery.sort) }
 }
 
 /** Whether two exports were asked for with the same filters and sort. */

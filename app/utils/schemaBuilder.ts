@@ -1,4 +1,4 @@
-import type { FormField, FormSchema } from '#shared/types/models'
+import type { FormField, FormFieldBody, FormSchema, FormSchemaBody } from '#shared/types/models'
 import { ulid } from './ulid'
 
 /** The rules the builder has controls for; anything else stays in `custom`, unchanged. */
@@ -128,9 +128,9 @@ export function schemaToDrafts(schema: FormSchema | null | undefined): FieldDraf
 }
 
 /** Builds the `schema` to save: one field per row, `order` numbered from 1, leaving out empty labels and rules. */
-export function draftsToSchema(drafts: readonly FieldDraft[]): FormSchema {
+export function draftsToSchema(drafts: readonly FieldDraft[]): FormSchemaBody {
   return drafts.map((draft, index) => {
-    const field: FormField = { id: draft.id, order: index + 1 }
+    const field: FormFieldBody = { id: draft.id, order: index + 1 }
     const label = draft.label.trim()
     const name = draft.name.trim()
     const rules = serializeRules(draft)

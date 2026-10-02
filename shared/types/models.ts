@@ -13,12 +13,11 @@ export type FormSchema = NonNullable<Form['schema']>
 export type FormField = FormSchema[number]
 export type FormSettings = NonNullable<Form['settings']>
 
-// The spec types each request field's `label`, `name` and `rules` as required (but nullable), while
-// the API accepts them omitted, as the resource types them. The bodies use the resource's field shape.
-type WithSchema<T> = Omit<T, 'schema'> & { schema?: FormSchema | null }
-
-export type FormStoreBody = WithSchema<Schemas['FormStoreRequest']>
-export type FormUpdateBody = WithSchema<Schemas['FormUpdateRequest']>
+export type FormStoreBody = Schemas['FormStoreRequest']
+export type FormUpdateBody = Schemas['FormUpdateRequest']
+/** The schema as sent to create or update a form, with each field's rules as an array. */
+export type FormSchemaBody = NonNullable<FormStoreBody['schema']>
+export type FormFieldBody = FormSchemaBody[number]
 
 export type FormEntry = Schemas['FormEntryResource']
 export type FormEntryUpdateBody = Schemas['FormEntryUpdateRequest']
@@ -26,11 +25,7 @@ export type FormEntryQuery = Schemas['FormEntryIndexRequest']
 export type FormEntryBulkBody = Schemas['FormEntryBulkRequest']
 export type FormEntryBulkAction = FormEntryBulkBody['action']
 
-// `parameters` is typed `string` in the spec, but the API returns the filters and sort the export
-// was requested with. The UI reads them to summarise an export and to retry a failed one.
-export type FormEntryExport = Omit<Schemas['FormEntryExportResource'], 'parameters'> & {
-  parameters: Pick<FormEntryQuery, 'filter' | 'sort'>
-}
+export type FormEntryExport = Schemas['FormEntryExportResource']
 
 export type FormNotification = Schemas['FormNotificationResource']
 export type FormNotificationStoreBody = Schemas['FormNotificationStoreRequest']

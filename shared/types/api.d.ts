@@ -482,7 +482,13 @@ export interface components {
             id: string;
             form_id: string;
             status: string;
-            parameters: string;
+            /** @description The entry filters and sort the export was created with. */
+            parameters: {
+                sort?: string;
+                filter?: {
+                    [key: string]: string;
+                };
+            };
             filename: string;
             row_count: number | null;
             error: string | null;
@@ -540,7 +546,8 @@ export interface components {
                 browser_version: string | null;
             } | null;
             spam: boolean | null;
-            spam_score: string;
+            /** @description Spam likelihood from 0 (not spam) to 1 (spam), to three decimal places. */
+            spam_score: number;
             spam_reason: string | null;
             /**
              * Format: date-time
@@ -670,9 +677,9 @@ export interface components {
             schema?: {
                 id: string;
                 order: number;
-                label: string | null;
-                name: string | null;
-                rules: string[] | null;
+                label?: string | null;
+                name?: string | null;
+                rules?: string[] | null;
             }[] | null;
             /** @description Every key is optional and takes its default when omitted. Unknown keys are rejected. */
             settings?: {
@@ -696,9 +703,9 @@ export interface components {
             schema?: {
                 id: string;
                 order: number;
-                label: string | null;
-                name: string | null;
-                rules: string[] | null;
+                label?: string | null;
+                name?: string | null;
+                rules?: string[] | null;
             }[] | null;
             /** @description Every key is optional and takes its default when omitted. Unknown keys are rejected. */
             settings?: {
@@ -932,7 +939,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        access_token: boolean | string;
+                        access_token: string;
                         /** @constant */
                         token_type: "bearer";
                         expires_in: number;

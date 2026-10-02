@@ -1,4 +1,4 @@
-import type { FormSchema } from '#shared/types/models'
+import type { FormSchemaBody } from '#shared/types/models'
 import { ulid } from './ulid'
 
 export interface FormTemplate {
@@ -6,7 +6,7 @@ export interface FormTemplate {
   label: string
   description: string
   /** Builds the template's schema, with fresh ULIDs as field IDs. */
-  schema: () => FormSchema | null
+  schema: () => FormSchemaBody | null
 }
 
 export const formTemplates: readonly FormTemplate[] = [

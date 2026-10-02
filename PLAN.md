@@ -21,18 +21,17 @@ Detailed requirements for each area (functional requirements, acceptance criteri
 
 Errors follow Laravel's shapes: 422 `{message, errors: {field: [..]}}`, 401, 403, 404.
 
-### Spec accuracy (re-checked 2026-10-01, after the backend changes)
+### Spec accuracy (re-checked 2026-10-02, after the backend changes)
 The generated types can be used as they are. All of these are now correct in the spec:
-- form `schema` (a list of `{ id, order, label?, name?, rules? }`) and `settings`, including the `FormResource.settings` response shape. One exception: the store/update request types mark each field's `label`, `name` and `rules` as required (nullable), though the API accepts them omitted, so `models.ts` types the request `schema` with the resource's field shape;
+- form `schema` (a list of `{ id, order, label?, name?, rules? }`) and `settings`, including the `FormResource.settings` response shape. In store/update requests only each field's `id` and `order` are required; `models.ts` names that shape `FormSchemaBody`, which the schema builder and templates produce (rules always as an array);
 - the bulk `action` enum;
 - boolean fields on entry and notification updates;
 - optional entry filters (`FormEntryIndexRequest`);
 - `input` and `user_agent_display` documented as objects, rejected if sent;
 - the public submission body contract;
 - the signed `download_url`;
-- `per_page` on the forms and entries lists, and the optional entry counts on `FormResource` (`FormListItem` in `models.ts` makes them required for list rows).
-
-One small gap remains. `FormEntryExportResource.parameters` is typed `string`, but the API returns an object (the filters and sort used). The UI reads it to summarise exports and retry failed ones, so `models.ts` overrides it as `Pick<FormEntryQuery, 'filter' | 'sort'>`.
+- `per_page` on the forms and entries lists, and the optional entry counts on `FormResource` (`FormListItem` in `models.ts` makes them required for list rows);
+- `access_token` as a `string`, `spam_score` as a `number` (the API returned it as a string such as `"0.950"` until 2026-10-02), and export `parameters` as an object with `filter` and `sort` (fixed in the API on 2026-10-02, so `models.ts` no longer overrides any of them).
 
 ## 2. Stack
 
@@ -212,6 +211,6 @@ Cross-cutting features:
 ## 8. Open questions
 Resolved on 2026-10-01: the API now has entry, unread and spam counts on the forms list, a `per_page` page size (1–100, default 15) on the forms and entries lists, `spam_checked_at` on entries, and an export index (`GET /v1/entry-exports`).
 
-1. Should the export index get a form filter, and should exports include the form name? Today the Entries popover filters the first 100 exports client-side, and `/exports` joins form names from the forms list.
-2. The `email_verified_at` field exists, but there's no verify endpoint. Is email verification planned?
-3. What's the production deploy target for Nuxt (Node server, Vercel, Cloudflare)? It decides the Nitro preset, and whether the in-memory refresh lock needs to become a KV/Redis lock.
+Decided on 2026-10-02: the export index won't get a form filter or form names (the Entries popover keeps filtering client-side, and `/exports` keeps joining names from the forms list), and email verification isn't planned.
+
+1. What's the production deploy target for Nuxt (Node server, Vercel, Cloudflare)? It decides the Nitro preset, and whether the in-memory refresh lock needs to become a KV/Redis lock.

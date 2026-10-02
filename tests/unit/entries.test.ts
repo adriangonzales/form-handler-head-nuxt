@@ -132,22 +132,22 @@ describe('spam check', () => {
   it('gives the likelihood as a percentage, only when the classifier scored the entry', () => {
     const scored = { created_at: created, spam_checked_at: '2026-10-01T12:00:05Z' }
 
-    expect(spamLikelihood({ ...scored, spam: true, spam_score: '0.950' })).toBe(95)
-    expect(spamLikelihood({ ...scored, spam: false, spam_score: '0.040' })).toBe(4)
-    expect(spamLikelihood({ ...scored, spam: false, spam_score: '0.000' })).toBe(0)
+    expect(spamLikelihood({ ...scored, spam: true, spam_score: 0.95 })).toBe(95)
+    expect(spamLikelihood({ ...scored, spam: false, spam_score: 0.04 })).toBe(4)
+    expect(spamLikelihood({ ...scored, spam: false, spam_score: 0 })).toBe(0)
     // Not checked yet.
     expect(
       spamLikelihood({
         created_at: created,
         spam_checked_at: null,
         spam: false,
-        spam_score: '0.000',
+        spam_score: 0,
       }),
     ).toBeNull()
     // Marked checked on arrival: a honeypot hit, or an entry added through the API.
     const onArrival = { created_at: created, spam_checked_at: created }
-    expect(spamLikelihood({ ...onArrival, spam: true, spam_score: '0.000' })).toBeNull()
-    expect(spamLikelihood({ ...onArrival, spam: false, spam_score: '0.000' })).toBeNull()
+    expect(spamLikelihood({ ...onArrival, spam: true, spam_score: 0 })).toBeNull()
+    expect(spamLikelihood({ ...onArrival, spam: false, spam_score: 0 })).toBeNull()
   })
 })
 

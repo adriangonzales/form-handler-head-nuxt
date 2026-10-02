@@ -46,7 +46,7 @@ export function relayApiError(event: H3Event, response: Response, body: unknown)
 }
 
 /** Builds the session's token data from an API token response. */
-export function tokenSetFromResponse(body: { access_token: string | boolean; expires_in: number }) {
+export function tokenSetFromResponse(body: { access_token: unknown; expires_in: number }) {
   if (typeof body.access_token !== 'string') {
     throw createError({ statusCode: 502, message: 'The API returned no token.' })
   }

@@ -5,6 +5,7 @@ import type {
   FormEntryExport,
   FormEntryQuery,
   FormField,
+  FormFieldBody,
   FormListItem,
   FormSettings,
 } from '../../shared/types/models'
@@ -47,6 +48,21 @@ describe('generated API types', () => {
 
   it('exposes when the spam check finished', () => {
     expectTypeOf<FormEntry['spam_checked_at']>().toEqualTypeOf<string | null>()
+  })
+
+  it('types the spam score as a number', () => {
+    expectTypeOf<FormEntry['spam_score']>().toEqualTypeOf<number>()
+  })
+
+  it('types export parameters as the filters and sort', () => {
+    expectTypeOf<FormEntryExport['parameters']>().toEqualTypeOf<{
+      sort?: string
+      filter?: { [key: string]: string }
+    }>()
+  })
+
+  it('lets schema fields in a request leave out label, name and rules', () => {
+    expectTypeOf<{ id: string; order: number }>().toExtend<FormFieldBody>()
   })
 
   it('exposes a nullable signed download url', () => {

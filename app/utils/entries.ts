@@ -148,7 +148,7 @@ export function spamCheckState(
 export function spamLikelihood(
   entry: Pick<FormEntry, 'spam' | 'spam_score' | 'spam_checked_at' | 'created_at'>,
 ): number | null {
-  const score = Number(entry.spam_score)
+  const score = entry.spam_score
 
   if (!entry.spam_checked_at || !Number.isFinite(score)) {
     return null
