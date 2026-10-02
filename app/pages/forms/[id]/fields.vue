@@ -38,16 +38,6 @@ const droppedNames = computed(() => {
   return savedNames.value.filter((name) => !current.has(name))
 })
 
-// Field IDs are always ULIDs. Fields saved under other keys get one when the form is next saved
-// (keeping their old key as the input name), so saving is allowed even without other changes.
-const needsUlids = computed(() => {
-  const schema = form.value?.schema
-
-  return Array.isArray(schema)
-    ? schema.length > 0
-    : Object.keys(schema ?? {}).some((key) => !isUlid(key))
-})
-
 function addField() {
   drafts.value.push(newFieldDraft())
 
@@ -150,15 +140,6 @@ function discard() {
     />
 
     <UAlert
-      v-if="needsUlids"
-      color="info"
-      variant="subtle"
-      icon="i-lucide-fingerprint"
-      title="Field IDs will be updated when you save"
-      description="Every field now has a ULID as its ID. Fields saved with other IDs get one, and keep their current input names, so your site, existing entries and exports carry on working."
-    />
-
-    <UAlert
       v-if="(entryCount ?? 0) > 0 && droppedNames.length > 0"
       color="warning"
       variant="subtle"
@@ -221,7 +202,7 @@ function discard() {
       <UButton
         label="Save fields"
         :loading="saving"
-        :disabled="!(dirty || needsUlids) || !hydrated"
+        :disabled="!dirty || !hydrated"
         @click="save"
       />
     </div>

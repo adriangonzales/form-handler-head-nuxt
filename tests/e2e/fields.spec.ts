@@ -5,6 +5,7 @@ import {
   deleteFormViaApi,
   goto,
   reload,
+  schemaFields,
   signIn,
   uniqueName,
 } from './support'
@@ -79,37 +80,54 @@ test('build fields, reorder them, save and reload', async ({ page }) => {
   expect(await page.locator('[data-field-id]').allTextContents()).toEqual(ids)
 
   const saved = await (await page.request.get(`/api/v1/forms/${form.id}`)).json()
-  expect(saved.data.schema).toEqual({
-    [ids[0]!]: { label: 'Full name', name: 'full_name', rules: ['required', 'max:255'] },
-    [ids[1]!]: { label: 'Topic', name: 'topic', rules: ['in:sales,support'] },
-    [ids[2]!]: {
+  expect(saved.data.schema).toEqual([
+    {
+      id: ids[0],
+      order: 1,
+      label: 'Full name',
+      name: 'full_name',
+      rules: ['required', 'max:255'],
+    },
+    { id: ids[1], order: 2, label: 'Topic', name: 'topic', rules: ['in:sales,support'] },
+    {
+      id: ids[2],
+      order: 3,
       label: 'Email address',
       name: 'contact_email',
       rules: ['required', 'email'],
     },
-  })
+  ])
 })
 
-test('fields saved with other IDs get ULIDs and keep their input names', async ({ page }) => {
+test('fields load in `order`, not list position, and save renumbered', async ({ page }) => {
   await signIn(page)
-  const form = await newForm(page, { schema: { email: { label: 'Email', rules: ['required'] } } })
+  const [first, second] = schemaFields({ email: { label: 'Email' }, message: { label: 'Message' } })
+  const form = await newForm(page, {
+    schema: [
+      { ...second!, order: 20 },
+      { ...first!, order: 10 },
+    ],
+  })
   await goto(page, `/forms/${form.id}/fields`)
 
-  await expect(page.getByText('Field IDs will be updated when you save')).toBeVisible()
   await expect(row(page, 1).getByRole('textbox', { name: 'Input name' })).toHaveValue('email')
+  await expect(row(page, 2).getByRole('textbox', { name: 'Input name' })).toHaveValue('message')
+  await page.getByRole('button', { name: 'Move Message up' }).click()
   await page.getByRole('button', { name: 'Save fields' }).click()
   await expect(page.getByText('Fields saved', { exact: true })).toBeVisible()
-  await expect(page.getByText('Field IDs will be updated when you save')).toHaveCount(0)
 
   const saved = await (await page.request.get(`/api/v1/forms/${form.id}`)).json()
-  const [id, field] = Object.entries(saved.data.schema)[0]!
-  expect(id).toMatch(ulid)
-  expect(field).toEqual({ label: 'Email', name: 'email', rules: ['required'] })
+  expect(
+    saved.data.schema.map((field: { id: string; order: number }) => [field.id, field.order]),
+  ).toEqual([
+    [second!.id, 1],
+    [first!.id, 2],
+  ])
 })
 
 test('invalid input names are flagged before saving', async ({ page }) => {
   await signIn(page)
-  const form = await newForm(page, { schema: { email: { label: 'Email' } } })
+  const form = await newForm(page, { schema: schemaFields({ email: { label: 'Email' } }) })
   await goto(page, `/forms/${form.id}/fields`)
 
   await addField(page, 'Email')
@@ -123,7 +141,7 @@ test('invalid input names are flagged before saving', async ({ page }) => {
 
 test('renaming a field on a form with entries warns first', async ({ page, request }) => {
   await signIn(page)
-  const form = await newForm(page, { schema: { message: { label: 'Message' } } })
+  const form = await newForm(page, { schema: schemaFields({ message: { label: 'Message' } }) })
   await page.request.put(`/api/v1/forms/${form.id}`, { data: { name: form.name, active: true } })
   await request.post(`${apiPublicBase}/v1/forms/${form.id}/submissions`, {
     data: { message: 'Could you send me a quote for next month?' },
@@ -140,10 +158,10 @@ test('renaming a field on a form with entries warns first', async ({ page, reque
 test('test submission shows validation errors, then succeeds', async ({ page }) => {
   await signIn(page)
   const form = await newForm(page, {
-    schema: {
+    schema: schemaFields({
       name: { label: 'Name', rules: ['required'] },
       email: { label: 'Email', rules: ['required', 'email'] },
-    },
+    }),
     settings: { message: 'Thanks, we will be in touch.' },
   })
   await goto(page, `/forms/${form.id}/integrate`)
@@ -179,7 +197,7 @@ test('the test form warns when this host is not an allowed domain', async ({ pag
 test('the generated snippet works when pasted into a blank page', async ({ page, browser }) => {
   await signIn(page)
   const form = await newForm(page, {
-    schema: { email: { label: 'Email', rules: ['required', 'email'] } },
+    schema: schemaFields({ email: { label: 'Email', rules: ['required', 'email'] } }),
     settings: { message: 'Thanks for signing up!' },
   })
   await page.request.put(`/api/v1/forms/${form.id}`, { data: { name: form.name, active: true } })

@@ -1,5 +1,5 @@
 import type { FormSchema } from '#shared/types/models'
-import { parseRules } from './schemaBuilder'
+import { orderedFields, parseRules } from './schemaBuilder'
 
 /** One input in a generated form, worked out from a schema field. */
 export interface SnippetField {
@@ -10,18 +10,14 @@ export interface SnippetField {
   options: string[]
 }
 
-export function snippetFields(schema: FormSchema | unknown[] | null | undefined): SnippetField[] {
-  if (!schema || Array.isArray(schema)) {
-    return []
-  }
-
-  return Object.entries(schema).map(([id, field]) => {
+export function snippetFields(schema: FormSchema | null | undefined): SnippetField[] {
+  return orderedFields(schema).map((field) => {
     const rules = parseRules(field.rules)
     const max = Number(rules.max)
 
     return {
-      name: field.name || id,
-      label: field.label || id,
+      name: field.name || field.id,
+      label: field.label || field.id,
       type:
         rules.oneOf.length > 0
           ? 'select'

@@ -8,11 +8,17 @@ export type Form = Schemas['FormResource']
 /** A form as returned by the forms list, which always includes the entry counts. */
 export type FormListItem = Form &
   Required<Pick<Form, 'entries_count' | 'unread_entries_count' | 'spam_entries_count'>>
+/** A list of fields, each with a ULID `id` and an integer `order`. The API returns it sorted by `order`. */
 export type FormSchema = NonNullable<Form['schema']>
-export type FormField = FormSchema[string]
+export type FormField = FormSchema[number]
 export type FormSettings = NonNullable<Form['settings']>
-export type FormStoreBody = Schemas['FormStoreRequest']
-export type FormUpdateBody = Schemas['FormUpdateRequest']
+
+// The spec types each request field's `label`, `name` and `rules` as required (but nullable), while
+// the API accepts them omitted, as the resource types them. The bodies use the resource's field shape.
+type WithSchema<T> = Omit<T, 'schema'> & { schema?: FormSchema | null }
+
+export type FormStoreBody = WithSchema<Schemas['FormStoreRequest']>
+export type FormUpdateBody = WithSchema<Schemas['FormUpdateRequest']>
 
 export type FormEntry = Schemas['FormEntryResource']
 export type FormEntryUpdateBody = Schemas['FormEntryUpdateRequest']

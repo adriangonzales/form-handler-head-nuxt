@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process'
 import { expect, type Page } from '@playwright/test'
+import { ulid } from '../../app/utils/ulid'
 
 export const credentials = {
   email: process.env.E2E_EMAIL ?? '',
@@ -37,6 +38,16 @@ export async function createFormViaApi(
   expect(response.status(), await response.text()).toBe(201)
 
   return (await response.json()).data
+}
+
+/** A list-shaped schema from input names: each field gets a fresh ULID `id` and the next `order`. */
+export function schemaFields(fields: Record<string, { label?: string; rules?: string[] }>) {
+  return Object.entries(fields).map(([name, field], index) => ({
+    id: ulid(),
+    order: index + 1,
+    name,
+    ...field,
+  }))
 }
 
 export async function deleteFormViaApi(page: Page, id: string) {

@@ -3,6 +3,7 @@ import {
   apiPublicBase,
   createFormViaApi,
   deleteFormViaApi,
+  schemaFields,
   signIn,
   uniqueName,
   goto,
@@ -82,7 +83,7 @@ test('the forms list shows entry, unread and spam counts', async ({ page, reques
   await signIn(page)
   const form = await track(
     createFormViaApi(page, uniqueName('Counts'), {
-      schema: { message: { label: 'Message', rules: ['required'] } },
+      schema: schemaFields({ message: { label: 'Message', rules: ['required'] } }),
     }),
   )
   await page.request.put(`/api/v1/forms/${form.id}`, { data: { name: form.name, active: true } })
@@ -141,7 +142,7 @@ test('validation errors appear on the right field', async ({ page }) => {
   await signIn(page)
   const form = await track(
     createFormViaApi(page, uniqueName('Clash'), {
-      schema: { email: { label: 'Email', rules: ['required', 'email'] } },
+      schema: schemaFields({ email: { label: 'Email', rules: ['required', 'email'] } }),
     }),
   )
 

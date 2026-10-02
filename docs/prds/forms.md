@@ -44,7 +44,7 @@ The forms list is the dashboard's home. From it, account holders see every form 
   - **Blank**;
   - **Contact:** name (required), email (required, email) and message (required, max 5000);
   - **Newsletter:** email (required, email).
-- Templates fill in `schema`, with a fresh ULID as each field's ID and the readable input names (`name`, `email`, `message`) as `name`.
+- Templates fill in `schema` as a list of fields, each with a fresh ULID `id`, an `order` from 1, and the readable input names (`name`, `email`, `message`) as `name`.
 - It submits `POST /v1/forms`. On 201 it goes to the new form's **Integrate** tab with a toast: "Form created. It's inactive until you turn it on."
 - New forms are inactive by default (_API Forms FR-3_).
 

@@ -44,49 +44,59 @@ const emailId = '01k6b8x9qm2v7c4d5e6f7g8h9k'
 const topicId = '01k6b8x9qm2v7c4d5e6f7g8h9m'
 
 describe('schema round trip', () => {
-  it('keeps ULID keys, order, labels, input names and rules', () => {
-    const schema = {
-      [nameId]: { label: 'Full name', name: 'full_name', rules: ['required', 'max:255'] },
-      [emailId]: { label: 'Email', name: 'contact_email', rules: 'required,email' },
-      [topicId]: { name: 'topic', rules: ['in:sales,support', 'nullable'] },
-    }
+  it('keeps IDs, labels, input names and rules, numbering `order` from 1', () => {
+    const schema = [
+      {
+        id: nameId,
+        order: 1,
+        label: 'Full name',
+        name: 'full_name',
+        rules: ['required', 'max:255'],
+      },
+      { id: emailId, order: 2, label: 'Email', name: 'contact_email', rules: 'required,email' },
+      { id: topicId, order: 5, name: 'topic', rules: ['in:sales,support', 'nullable'] },
+    ]
 
-    expect(draftsToSchema(schemaToDrafts(schema))).toEqual({
-      [nameId]: { label: 'Full name', name: 'full_name', rules: ['required', 'max:255'] },
-      [emailId]: { label: 'Email', name: 'contact_email', rules: ['required', 'email'] },
-      [topicId]: { name: 'topic', rules: ['in:sales,support', 'nullable'] },
-    })
-    expect(Object.keys(draftsToSchema(schemaToDrafts(schema)))).toEqual([nameId, emailId, topicId])
+    expect(draftsToSchema(schemaToDrafts(schema))).toEqual([
+      {
+        id: nameId,
+        order: 1,
+        label: 'Full name',
+        name: 'full_name',
+        rules: ['required', 'max:255'],
+      },
+      {
+        id: emailId,
+        order: 2,
+        label: 'Email',
+        name: 'contact_email',
+        rules: ['required', 'email'],
+      },
+      { id: topicId, order: 3, name: 'topic', rules: ['in:sales,support', 'nullable'] },
+    ])
   })
 
-  it('keeps a ULID-keyed field without a name submitting under its ULID', () => {
-    const [draft] = schemaToDrafts({ [nameId]: { label: 'Name' } })
+  it('reads fields sorted by `order`, not list position', () => {
+    const drafts = schemaToDrafts([
+      { id: topicId, order: 30 },
+      { id: nameId, order: 10 },
+      { id: emailId, order: 20 },
+    ])
+
+    expect(drafts.map((draft) => draft.id)).toEqual([nameId, emailId, topicId])
+  })
+
+  it('keeps a field without a name submitting under its ID', () => {
+    const [draft] = schemaToDrafts([{ id: nameId, order: 1, label: 'Name' }])
 
     expect(draft!.name).toBe(nameId)
-    expect(draftsToSchema([draft!])).toEqual({ [nameId]: { label: 'Name' } })
+    expect(draftsToSchema([draft!])).toEqual([{ id: nameId, order: 1, label: 'Name' }])
   })
 
-  it('gives fields with other keys a ULID, keeping the old key as the input name', () => {
-    const saved = draftsToSchema(
-      schemaToDrafts({ email: { label: 'Email' }, message: { name: 'body' } }),
-    )
-    const [first, second] = Object.entries(saved)
-
-    expect(Object.keys(saved).every(isUlid)).toBe(true)
-    expect(first![1]).toEqual({ label: 'Email', name: 'email' })
-    expect(second![1]).toEqual({ name: 'body' })
-  })
-
-  it('reads the API’s empty schema `[]` and null as no fields', () => {
+  it('reads an empty or null schema as no fields', () => {
     expect(schemaToDrafts([])).toEqual([])
     expect(schemaToDrafts(null)).toEqual([])
-  })
-
-  it('reads a list-shaped schema (numeric keys) by index, keeping the index as the input name', () => {
-    const [draft] = schemaToDrafts([{ label: 'Zero' }])
-
-    expect(isUlid(draft!.id)).toBe(true)
-    expect([draft!.label, draft!.name]).toEqual(['Zero', '0'])
+    expect(draftsToSchema([])).toEqual([])
   })
 })
 

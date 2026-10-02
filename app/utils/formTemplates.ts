@@ -15,18 +15,30 @@ export const formTemplates: readonly FormTemplate[] = [
     value: 'contact',
     label: 'Contact',
     description: 'Name, email and message.',
-    schema: () => ({
-      [ulid()]: { label: 'Name', name: 'name', rules: ['required', 'max:255'] },
-      [ulid()]: { label: 'Email', name: 'email', rules: ['required', 'email', 'max:255'] },
-      [ulid()]: { label: 'Message', name: 'message', rules: ['required', 'max:5000'] },
-    }),
+    schema: () => [
+      { id: ulid(), order: 1, label: 'Name', name: 'name', rules: ['required', 'max:255'] },
+      {
+        id: ulid(),
+        order: 2,
+        label: 'Email',
+        name: 'email',
+        rules: ['required', 'email', 'max:255'],
+      },
+      { id: ulid(), order: 3, label: 'Message', name: 'message', rules: ['required', 'max:5000'] },
+    ],
   },
   {
     value: 'newsletter',
     label: 'Newsletter',
     description: 'Email address only.',
-    schema: () => ({
-      [ulid()]: { label: 'Email', name: 'email', rules: ['required', 'email', 'max:255'] },
-    }),
+    schema: () => [
+      {
+        id: ulid(),
+        order: 1,
+        label: 'Email',
+        name: 'email',
+        rules: ['required', 'email', 'max:255'],
+      },
+    ],
   },
 ]

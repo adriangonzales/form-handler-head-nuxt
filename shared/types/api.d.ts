@@ -626,13 +626,14 @@ export interface components {
             user_id: number;
             name: string;
             active: boolean;
+            /** @description Fields sorted by `order`. */
             schema: {
-                [key: string]: {
-                    label?: string;
-                    name?: string;
-                    rules?: string[] | string;
-                };
-            } | null;
+                id: string;
+                order: number;
+                label?: string;
+                name?: string;
+                rules?: string[] | string;
+            }[] | null;
             settings: {
                 redirect: string | null;
                 timezone: string | null;
@@ -662,16 +663,17 @@ export interface components {
         FormStoreRequest: {
             name: string;
             /**
-             * @description Fields keyed by field ID. Each may set a `label`, an input `name` (defaults to the ID) and
-             *     Laravel validation `rules` (an array or a comma-separated string).
+             * @description A list of fields. Each has a unique ULID `id` and an integer `order` used to sort fields for
+             *     display, and may set a `label`, an input `name` (defaults to the ID) and Laravel validation
+             *     `rules` (an array or a comma-separated string). Other keys are rejected.
              */
             schema?: {
-                [key: string]: {
-                    label?: string;
-                    name?: string;
-                    rules?: string[] | string;
-                };
-            } | null;
+                id: string;
+                order: number;
+                label: string | null;
+                name: string | null;
+                rules: string[] | null;
+            }[] | null;
             /** @description Every key is optional and takes its default when omitted. Unknown keys are rejected. */
             settings?: {
                 redirect?: string | null;
@@ -687,16 +689,17 @@ export interface components {
             name: string;
             active: boolean;
             /**
-             * @description Fields keyed by field ID. Each may set a `label`, an input `name` (defaults to the ID) and
-             *     Laravel validation `rules` (an array or a comma-separated string).
+             * @description A list of fields. Each has a unique ULID `id` and an integer `order` used to sort fields for
+             *     display, and may set a `label`, an input `name` (defaults to the ID) and Laravel validation
+             *     `rules` (an array or a comma-separated string). Other keys are rejected.
              */
             schema?: {
-                [key: string]: {
-                    label?: string;
-                    name?: string;
-                    rules?: string[] | string;
-                };
-            } | null;
+                id: string;
+                order: number;
+                label: string | null;
+                name: string | null;
+                rules: string[] | null;
+            }[] | null;
             /** @description Every key is optional and takes its default when omitted. Unknown keys are rejected. */
             settings?: {
                 redirect?: string | null;

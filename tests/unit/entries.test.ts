@@ -64,13 +64,13 @@ describe('entry list query', () => {
 })
 
 describe('entryFields', () => {
-  it('keys fields by input name, falling back to the ID, in schema order', () => {
+  it('keys fields by input name, falling back to the ID, sorted by `order`', () => {
     expect(
-      entryFields({
-        '01K6A': { label: 'Email', name: 'email' },
-        '01K6B': { rules: ['required'] },
-        '01K6C': { name: 'message' },
-      }),
+      entryFields([
+        { id: '01K6C', order: 3, name: 'message' },
+        { id: '01K6A', order: 1, label: 'Email', name: 'email' },
+        { id: '01K6B', order: 2, rules: ['required'] },
+      ]),
     ).toEqual([
       { key: 'email', label: 'Email' },
       { key: '01K6B', label: '01K6B' },

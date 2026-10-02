@@ -4,14 +4,14 @@ import { formHtml, formScript, scriptLiteral, snippetFields } from '../../app/ut
 describe('snippetFields', () => {
   it('infers input types from rules', () => {
     expect(
-      snippetFields({
-        email: { label: 'Email', rules: ['required', 'email'] },
-        site: { rules: ['url'] },
-        age: { rules: ['numeric'] },
-        message: { rules: ['max:5000'] },
-        topic: { name: 'subject', rules: ['in:sales,support'] },
-        plain: {},
-      }).map(({ name, type, required }) => [name, type, required]),
+      snippetFields([
+        { id: 'email', order: 1, label: 'Email', rules: ['required', 'email'] },
+        { id: 'site', order: 2, rules: ['url'] },
+        { id: 'age', order: 3, rules: ['numeric'] },
+        { id: 'message', order: 4, rules: ['max:5000'] },
+        { id: 'topic', order: 5, name: 'subject', rules: ['in:sales,support'] },
+        { id: 'plain', order: 6 },
+      ]).map(({ name, type, required }) => [name, type, required]),
     ).toEqual([
       ['email', 'email', true],
       ['site', 'url', false],
@@ -22,8 +22,18 @@ describe('snippetFields', () => {
     ])
   })
 
-  it('treats the API’s empty schema as no fields', () => {
+  it('lists fields by `order`', () => {
+    expect(
+      snippetFields([
+        { id: 'b', order: 2 },
+        { id: 'a', order: 1 },
+      ]).map((field) => field.name),
+    ).toEqual(['a', 'b'])
+  })
+
+  it('treats an empty or null schema as no fields', () => {
     expect(snippetFields([])).toEqual([])
+    expect(snippetFields(null)).toEqual([])
   })
 })
 
@@ -31,7 +41,9 @@ describe('formHtml', () => {
   it('labels every input and adds the honeypot', () => {
     const html = formHtml({
       endpoint: 'https://api.example.com/api/v1/forms/01J/submissions',
-      fields: snippetFields({ email: { label: 'Email', rules: ['required', 'email'] } }),
+      fields: snippetFields([
+        { id: 'email', order: 1, label: 'Email', rules: ['required', 'email'] },
+      ]),
       honeypotName: 'website_k3x9qa',
     })
 
@@ -45,9 +57,15 @@ describe('formHtml', () => {
   it('escapes hostile labels, names and options', () => {
     const html = formHtml({
       endpoint: 'https://api.example.com/x',
-      fields: snippetFields({
-        x: { label: '"><script>alert(1)</script>', name: 'a"b', rules: ['in:<b>,c'] },
-      }),
+      fields: snippetFields([
+        {
+          id: 'x',
+          order: 1,
+          label: '"><script>alert(1)</script>',
+          name: 'a"b',
+          rules: ['in:<b>,c'],
+        },
+      ]),
     })
 
     expect(html).not.toContain('<script>')

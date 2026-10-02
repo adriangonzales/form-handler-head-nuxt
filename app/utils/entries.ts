@@ -5,6 +5,7 @@ import type {
   FormSchema,
 } from '#shared/types/models'
 import type { ListQueryOptions, ListQueryState } from './listQuery'
+import { orderedFields } from './schemaBuilder'
 
 export const entryStatuses = ['inbox', 'unread', 'starred', 'spam', 'trash'] as const
 export type EntryStatus = (typeof entryStatuses)[number]
@@ -82,14 +83,10 @@ export interface EntryField {
   label: string
 }
 
-/** The schema's fields in schema order, keyed the way entries store their input. */
-export function entryFields(schema: FormSchema | unknown[] | null | undefined): EntryField[] {
-  if (!schema || Array.isArray(schema)) {
-    return []
-  }
-
-  return Object.entries(schema).map(([id, field]) => {
-    const key = field.name || id
+/** The schema's fields sorted by `order`, keyed the way entries store their input. */
+export function entryFields(schema: FormSchema | null | undefined): EntryField[] {
+  return orderedFields(schema).map((field) => {
+    const key = field.name || field.id
 
     return { key, label: field.label || key }
   })

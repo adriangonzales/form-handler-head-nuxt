@@ -17,10 +17,10 @@ test.afterEach(async ({ page }) => {
   }
 })
 
-const schema = {
-  '01K6E2E0000000000000000001': { label: 'Name', name: 'name' },
-  '01K6E2E0000000000000000002': { label: 'Message', name: 'message' },
-}
+const schema = [
+  { id: '01K6E2E0000000000000000001', order: 1, label: 'Name', name: 'name' },
+  { id: '01K6E2E0000000000000000002', order: 2, label: 'Message', name: 'message' },
+]
 
 async function createForm(page: Page, prefix: string) {
   const form = await createFormViaApi(page, uniqueName(prefix), { schema })
