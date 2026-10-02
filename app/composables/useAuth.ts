@@ -1,9 +1,10 @@
-export type SignedOutReason = 'expired' | 'signed-out' | 'password-reset'
+export type SignedOutReason = 'expired' | 'signed-out' | 'password-reset' | 'account-deleted'
 
 export const signedOutMessages: Record<SignedOutReason, string> = {
   expired: 'Your session has ended. Please sign in again.',
   'signed-out': "You've been signed out.",
   'password-reset': 'Your password has been reset. Sign in with your new password.',
+  'account-deleted': 'Your account has been deleted.',
 }
 
 /** Signs in through the server route, then loads the new session into `useUserSession()`. */

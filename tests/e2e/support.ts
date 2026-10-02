@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process'
 import { expect, type Page } from '@playwright/test'
 
 export const credentials = {
@@ -65,4 +66,57 @@ export async function goto(page: Page, url: string) {
 export async function reload(page: Page) {
   await page.reload()
   await hydrated(page)
+}
+
+export interface Account {
+  name: string
+  email: string
+  password: string
+}
+
+const apiDir = process.env.E2E_API_DIR ?? '../form-handler-headless-laravel'
+
+/**
+ * Creates a user with the API's `user:create` command, for tests that change or delete the account
+ * and so can't use the shared E2E user. Needs the API's code next to this repository (E2E_API_DIR).
+ */
+export function createThrowawayUser(prefix = 'Account'): Account {
+  const id = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
+  const account = {
+    name: `${prefix} ${id}`,
+    email: `e2e-${id}@example.com`,
+    password: `Throwaway-${id}-pw!`,
+  }
+
+  execFileSync(
+    'php',
+    [
+      'artisan',
+      'user:create',
+      `--name=${account.name}`,
+      `--email=${account.email}`,
+      `--password=${account.password}`,
+      '--no-interaction',
+    ],
+    { cwd: apiDir, stdio: 'pipe' },
+  )
+
+  return account
+}
+
+export async function signInAs(
+  page: Page,
+  account: Pick<Account, 'email' | 'password'>,
+  path = '/forms',
+) {
+  await page.goto(path)
+  await page.getByLabel('Email').fill(account.email)
+  await page.getByLabel('Password').fill(account.password)
+  await page.getByRole('button', { name: 'Sign in' }).click()
+  await expect(page).toHaveURL(path)
+}
+
+/** Deletes the signed-in account through the dashboard's server route, ignoring failures. */
+export async function deleteAccountViaApi(page: Page, password: string) {
+  await page.request.delete('/api/auth/me', { data: { password } }).catch(() => undefined)
 }

@@ -24,6 +24,10 @@ export default defineNuxtConfig({
     public: {
       // Base URL shown in embed snippets and used by the test-submit tool.
       apiPublicBase: process.env.NUXT_PUBLIC_API_PUBLIC_BASE ?? '',
+      // Shown under "New password". Match the API environment's password policy: Laravel's
+      // defaults there are 8 characters, or the stricter rules below in production.
+      passwordRequirements:
+        process.env.NUXT_PUBLIC_PASSWORD_REQUIREMENTS ?? 'Use at least 8 characters.',
     },
   },
 

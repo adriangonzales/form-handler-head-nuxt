@@ -1,6 +1,6 @@
 # PRD: Account
 
-**Status:** Planned (milestone 8) · **Owner area:** `app/pages/account.vue`, `server/api/auth/password.put.ts`, `server/api/auth/me.patch.ts`, `server/api/auth/me.delete.ts`
+**Status:** Built (milestone 8, 2026-10-01) · **Owner area:** `app/pages/account.vue`, `app/components/account/DeleteAccountModal.vue`, `server/api/auth/password.put.ts`, `server/api/auth/me.patch.ts`, `server/api/auth/me.delete.ts`
 
 ## 1. Summary
 
@@ -64,6 +64,7 @@ _API Auth_ FR-10 (profile; changing the email clears verification), FR-11 (passw
 
 - **No email verification flow**, so the verified state that changing the email clears is never set again.
 - **No active-sessions list, and no "log out other sessions"** without changing the password.
+- **The API takes the deletion password as a query parameter** (`DELETE /v1/auth/me?password=`), so it can end up in API access logs. The dashboard sends it to its own server route in the body, but the server-to-server call has to use the query. Accepting it in the body would be safer.
 
 ## 9. Open questions
 

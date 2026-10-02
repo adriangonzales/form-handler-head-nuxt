@@ -81,3 +81,26 @@ async function refreshAtApi(event: H3Event, token: string): Promise<TokenSet | n
 
   return tokenSetFromResponse(data)
 }
+
+/**
+ * Calls the API with the session's token, refreshing it and retrying once if the API answers 401.
+ * Throws 401 when there's no usable session, so the client sends the user to the login page.
+ */
+export async function withApiToken<T extends { response: Response }>(
+  event: H3Event,
+  call: (token: string) => Promise<T>,
+): Promise<T> {
+  let token = await getApiToken(event)
+  let result = token ? await call(token) : undefined
+
+  if (result?.response.status === 401) {
+    token = await getApiToken(event, { forceRefresh: true })
+    result = token ? await call(token) : undefined
+  }
+
+  if (!result || result.response.status === 401) {
+    throw createError({ statusCode: 401, message: 'Unauthenticated.' })
+  }
+
+  return result
+}

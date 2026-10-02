@@ -21,7 +21,7 @@ test('wrong credentials show the API message on the email field', async ({ page 
 test('signing in returns to the requested page and survives a reload', async ({ page }) => {
   await signIn(page, '/account')
 
-  await expect(page.getByText(`Signed in as ${credentials.email}`)).toBeVisible()
+  await expect(page.getByLabel('Email', { exact: true })).toHaveValue(credentials.email)
 
   await page.reload()
   await expect(page).toHaveURL('/account')

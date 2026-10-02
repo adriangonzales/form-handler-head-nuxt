@@ -1,15 +1,9 @@
 /** Reloads the signed-in user from the API and stores it in the session. */
 export default defineEventHandler(async (event) => {
-  let token = await getApiToken(event)
-  let me = token ? await useLaravel(event, token).GET('/v1/auth/me') : undefined
+  const me = await withApiToken(event, (token) => useLaravel(event, token).GET('/v1/auth/me'))
 
-  if (me?.response.status === 401) {
-    token = await getApiToken(event, { forceRefresh: true })
-    me = token ? await useLaravel(event, token).GET('/v1/auth/me') : undefined
-  }
-
-  if (!me?.data) {
-    throw createError({ statusCode: 401, message: 'Unauthenticated.' })
+  if (!me.data) {
+    throw createError({ statusCode: 502, message: 'The account could not be loaded.' })
   }
 
   await setUserSession(event, { user: me.data.data })

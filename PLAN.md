@@ -95,7 +95,7 @@ form-handler-head-nuxt/
 │  │                  useExport (create → poll → download), useListQuery (sync filters/sort/page to URL)
 │  └─ utils/          apiErrors.ts (422 → field errors), format.ts
 ├─ server/
-│  ├─ api/auth/       login.post, logout.post, me.get, forgot-password.post, reset-password.post
+│  ├─ api/auth/       login.post, logout.post, me.get/patch/delete, password.put, forgot-password.post, reset-password.post
 │  ├─ api/v1/[...path].ts
 │  └─ utils/          laravel.ts (openapi-fetch client), tokens.ts (refresh + lock)
 ├─ shared/types/      api.d.ts (generated), models.ts (Form, Entry, … aliases)
@@ -189,7 +189,11 @@ Cross-cutting features:
    - **Add / edit** (`NotificationForm`, a modal via `useOverlay`): Email or SMS, value, Enabled. Checked in the browser like the API (email, or E.164 for SMS, with a hint about the country code); phone numbers lose spaces, dashes and brackets on blur, and `00` becomes `+`. SMS shows a notice that it isn't delivered yet. 422s map onto the fields.
    - **Errors are shown inline rather than in a tooltip** (the PRD asked for a tooltip), so the full message is readable on touch screens and with a keyboard.
    - **Tests:** 119 unit tests and 46 Playwright tests (5 for notifications: add and edit, E.164 checks, the API's 422, enable/disable and Remove/Undo persisting, and a faked bounce). AC-1 was checked by hand: a public submission's alert reached the API's `log` mailer once the queue worker ran.
-8. **Account.** Profile, password change (token swapped in the session), delete account.
+8. ✅ **Account** (built 2026-10-01).
+   - **Server routes** (`server/api/auth/`): `me.patch` (updates the session's user), `password.put` (stores the new token with `startApiSession`, so this browser stays signed in and the refresh window starts again), and `me.delete` (the browser sends the password in the body; it only travels as the API's query parameter server to server; clears the session on 204). They share `withApiToken`, which refreshes and retries once on a 401; `me.get` uses it too.
+   - **Page** (`pages/account.vue`): profile (sends only what changed, warns that a new email clears verification, header updates straight away), change password (requirements text from `NUXT_PUBLIC_PASSWORD_REQUIREMENTS`, fields cleared after success), and a danger zone listing what's deleted. `DeleteAccountModal` asks for the password and enables Delete only once the email is typed; afterwards the login page says "Your account has been deleted."
+   - **Tests:** 119 unit tests and 50 Playwright tests (4 for the account: name in the header, a taken email, password change keeping this session and signing out a second browser, and deletion with the wrong and then the right password). **They create throwaway users** with `php artisan user:create` in `E2E_API_DIR` (default `../form-handler-headless-laravel`), and delete them afterwards.
+   - **Known edge:** a request already in flight with the old token while the password changes gets a 401, and its refresh fails because the API revoked that token chain, so that tab is signed out. Rare, since the account page is the only thing making requests at that moment.
 9. **Polish and tests.** Empty and error states, accessibility pass, Playwright happy paths for each milestone, and a README.
 
 ## 7. Testing approach
