@@ -14,6 +14,9 @@ importers:
       '@iconify-json/lucide':
         specifier: ^1.2.138
         version: 1.2.138
+      '@internationalized/date':
+        specifier: ^3.12.4
+        version: 3.12.4
       '@nuxt/ui':
         specifier: ^4.11.3
         version: 4.11.3(1dc6913aeac35190fd7b5f1a87e82e4b)

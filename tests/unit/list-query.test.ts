@@ -49,3 +49,30 @@ describe('toApiQuery', () => {
     })
   })
 })
+
+describe('filters checked by a function, and default filter values', () => {
+  const withDefaults = {
+    sorts: ['-created_at'],
+    defaultSort: '-created_at',
+    filters: {
+      status: ['inbox', 'spam'],
+      from: (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value),
+    },
+    defaultFilter: { status: 'inbox' },
+  }
+
+  it('applies the default when the URL has none, and leaves it out of the URL', () => {
+    const state = parseListQuery({}, withDefaults)
+
+    expect(state.filter).toEqual({ status: 'inbox' })
+    expect(toRouteQuery(state, withDefaults)).toEqual({})
+    expect(toRouteQuery({ ...state, filter: { status: 'spam' } }, withDefaults)).toEqual({
+      status: 'spam',
+    })
+  })
+
+  it('accepts values that pass the check', () => {
+    expect(parseListQuery({ from: '2026-10-01' }, withDefaults).filter.from).toBe('2026-10-01')
+    expect(parseListQuery({ from: 'yesterday' }, withDefaults).filter.from).toBeUndefined()
+  })
+})

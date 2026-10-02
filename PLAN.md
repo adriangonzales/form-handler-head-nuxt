@@ -87,7 +87,7 @@ form-handler-head-nuxt/
 │  ├─ pages/          (see §5)
 │  ├─ components/
 │  │  ├─ forms/       FormTable, FormSettingsForm, SchemaBuilder, SchemaFieldRow, EmbedSnippet, TestSubmit
-│  │  ├─ entries/     EntryTable, EntryFilters, EntryBulkBar, EntryDetail, ExportButton
+│  │  ├─ entries/     EntryFilters, EntryBulkBar, EntryDetail, ExportButton
 │  │  ├─ exports/     ExportList (shared by the Entries popover and /exports)
 │  │  ├─ notifications/ NotificationList, NotificationForm
 │  │  └─ ui/          ConfirmModal, Pagination, EmptyState, ApiErrorAlert
@@ -152,7 +152,7 @@ Cross-cutting features:
    - the Settings tab, which sends only the settings that are set, shows a generated honeypot name with a copy button, maps 422 errors onto fields, and warns about unsaved changes;
    - delete with Undo, from the list and from Settings;
    - duplicate, which opens the copy's Settings.
-   - **Shared code:** `useListQuery` and `app/utils/listQuery.ts` (reused by entries in milestone 5), `useForms`, and `RelativeTime`.
+   - **Shared code:** `useListQuery` and `app/utils/listQuery.ts` (reused by entries), `useForms`, and `RelativeTime`.
    - **Tests:** 64 unit tests and 20 Playwright tests (9 for forms), all passing against the live API. The e2e helpers `goto`/`reload` wait for hydration before interacting.
    - **Entries links:** counts link to `/forms/[id]/entries?status=unread|spam`, so milestone 5's tabs read `status` from the URL.
 4. ✅ **Fields and Integrate** (built 2026-10-01).
@@ -168,7 +168,14 @@ Cross-cutting features:
    - **Shared code:** `useUnsavedChanges` (Settings uses it too), `useCopy`, `CodeBlock`, `hostAllowed`.
    - **Tests:** 89 unit tests and 27 Playwright tests. One test pastes the generated snippet into a blank, signed-out page and submits a real entry.
    - **API issue found:** numeric field IDs make the API store the schema as a JSON list. The dashboard avoids this with ULIDs; the API could require ULIDs too (open question in the Fields & Integration PRD).
-5. **Entries.** Table, filters and page size in the URL, tab counts, detail view with spam likelihood and check state (Checking / Not checked, auto-refresh while pending), auto mark-read, bulk actions, trash view.
+5. ✅ **Entries** (built 2026-10-01).
+   - **List** (`pages/forms/[id]/entries.vue`): Inbox/Unread/Starred/Spam/Trash tabs with count badges, a UTC date range, sort (newest/oldest, spam likelihood), page size, all in the URL (`status`, `from`, `to`). Columns follow the schema; unread rows are bold with a dot; inline star toggle; Spam and Checking… badges. While any row is Checking, the list and counts reload every 10 s.
+   - **Detail** (`entries/[entryId].vue`): a child route shown in a slide-over over the list (full width on phones), so the list query is kept. Marks the entry read on open, star/read/spam toggles, delete with Undo, and in Trash restore or delete permanently (confirmed). Previous/next (also `k`/`j`) follow the list and load the adjacent page at its edges. Polls while the spam check is pending and toasts if the entry moves to Spam.
+   - **Bulk actions** for the selected rows on the page, with the `affected` count in the toast, Undo for delete, and the stale-selection 422 handled.
+   - **Shared code:** `utils/entries.ts` (tab filters, spam check state and likelihood, neighbours, bulk actions), `useEntries`, `useEntryCounts`, `useNow`, `ConfirmModal`. `useListQuery` filters can now be checked by a function and have defaults. `deleteFormWithUndo` became `useDeleteFormWithUndo()`, because `useToast()` can't be called from an event handler.
+   - **Spam check timing** (`app.config.ts` → `entries`): 2-minute Checking window, 10 s polling. "Parsing…" for the user agent uses the same window.
+   - **Tests:** 106 unit tests and 36 Playwright tests (9 for entries, covering AC-1 to AC-7 and the Checking state).
+   - **API notes:** `GET /v1/entries/{id}` doesn't return deleted entries, so Trash shows the list's copy of the row. The local API's queue had no worker during testing, so public submissions stayed Checking and then Not checked; AC-8 with a classifier key hasn't been verified.
 6. **Exports.** Queue, poll, download via the signed link, handling an expired signature or export. A recent-exports popover per form, and the account-wide `/exports` page from the export index.
 7. **Notifications.** CRUD, enable toggle, bounce/error display.
 8. **Account.** Profile, password change (token swapped in the session), delete account.

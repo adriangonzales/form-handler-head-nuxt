@@ -5,6 +5,7 @@ import { z } from 'zod'
 
 const route = useRoute()
 const toast = useToast()
+const deleteFormWithUndo = useDeleteFormWithUndo()
 const hydrated = useHydrated()
 const id = String(route.params.id)
 

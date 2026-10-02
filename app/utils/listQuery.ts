@@ -5,8 +5,13 @@ export const pageSizes = [15, 25, 50, 100] as const
 export interface ListQueryOptions<F extends string = string> {
   sorts: readonly string[]
   defaultSort: string
-  /** Allowed values per filter, keyed by the URL parameter name (`active` → `?active=true`). */
-  filters: Record<F, readonly string[]>
+  /**
+   * Allowed values per filter, keyed by the URL parameter name (`active` → `?active=true`): a list,
+   * or a check for free-form values such as dates.
+   */
+  filters: Record<F, readonly string[] | ((value: string) => boolean)>
+  /** Filter values left out of the URL because they're the default (`status=inbox`). */
+  defaultFilter?: Partial<Record<F, string>>
   defaultPerPage?: number
 }
 
@@ -27,10 +32,16 @@ export function parseListQuery<F extends string>(
   const sort = first(query.sort)
   const filter: Partial<Record<F, string>> = {}
 
-  for (const [name, allowed] of Object.entries(options.filters) as [F, readonly string[]][]) {
-    const value = first(query[name])
+  for (const [name, allowed] of Object.entries(options.filters) as [
+    F,
+    ListQueryOptions<F>['filters'][F],
+  ][]) {
+    const value = first(query[name]) ?? options.defaultFilter?.[name]
 
-    if (value !== undefined && allowed.includes(value)) {
+    if (
+      value !== undefined &&
+      (typeof allowed === 'function' ? allowed(value) : allowed.includes(value))
+    ) {
       filter[name] = value
     }
   }
@@ -50,7 +61,13 @@ export function toRouteQuery<F extends string>(
   state: ListQueryState<F>,
   options: ListQueryOptions<F>,
 ): LocationQueryRaw {
-  const query: LocationQueryRaw = { ...state.filter }
+  const query: LocationQueryRaw = {}
+
+  for (const [name, value] of Object.entries(state.filter) as [F, string | undefined][]) {
+    if (value !== undefined && value !== options.defaultFilter?.[name]) {
+      query[name] = value
+    }
+  }
 
   if (state.sort !== options.defaultSort) {
     query.sort = state.sort

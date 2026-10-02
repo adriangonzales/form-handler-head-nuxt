@@ -1,6 +1,6 @@
 # PRD: Entries
 
-**Status:** Planned (milestone 5) · **Owner area:** `app/pages/forms/[id]/entries/index.vue`, `app/pages/forms/[id]/entries/[entryId].vue`, `app/components/entries/EntryTable.vue`, `app/components/entries/EntryFilters.vue`, `app/components/entries/EntryBulkBar.vue`, `app/components/entries/EntryDetail.vue`, `app/composables/useEntries.ts`
+**Status:** Built (milestone 5, 2026-10-01; Export CSV comes with milestone 6) · **Owner area:** `app/pages/forms/[id]/entries.vue`, `app/pages/forms/[id]/entries/[entryId].vue`, `app/utils/entries.ts`, `app/components/entries/EntryFilters.vue`, `app/components/entries/EntryBulkBar.vue`, `app/components/entries/EntryDetail.vue`, `app/composables/useEntries.ts`
 
 ## 1. Summary
 
@@ -125,6 +125,8 @@ _API Entries_ FR-1a (Jev spam classification, threshold 0.9, `spam_checked_at`, 
 
 - **No IP geolocation:** `ip_location_display` is always null, so the detail view doesn't show it.
 - **No full-text search over entries:** the API has no search filter.
+- **Deleted entries can't be fetched one at a time:** `GET /v1/entries/{id}` returns 404 for an entry in Trash, so the detail view shows the list's copy of the row there. A link to a deleted entry that isn't on the current page shows "Entry not found".
+- **Entries checked on arrival have a score of 0:** honeypot hits and entries added through the API are marked checked when they're created, without a classifier score. The dashboard treats a 0 score checked within a second of arrival as "no likelihood" rather than 0%.
 
 ## 9. Open questions
 

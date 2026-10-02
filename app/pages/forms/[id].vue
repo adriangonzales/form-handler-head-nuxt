@@ -3,6 +3,7 @@ import type { DropdownMenuItem, NavigationMenuItem } from '@nuxt/ui'
 
 const route = useRoute()
 const toast = useToast()
+const deleteFormWithUndo = useDeleteFormWithUndo()
 const id = computed(() => String(route.params.id))
 
 const { data: form, error } = await useFormDetail(id)

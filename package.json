@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.138",
+    "@internationalized/date": "^3.12.4",
     "@nuxt/ui": "^4.11.3",
     "nuxt": "^4.5.2",
     "nuxt-auth-utils": "^0.5.30",

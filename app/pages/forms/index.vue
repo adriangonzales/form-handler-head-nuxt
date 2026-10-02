@@ -5,6 +5,7 @@ import type { FormListItem } from '#shared/types/models'
 useSeoMeta({ title: 'Forms · Form Handler' })
 
 const toast = useToast()
+const deleteFormWithUndo = useDeleteFormWithUndo()
 const { state, apiQuery, update } = useListQuery('forms', formListOptions)
 
 const { data, status, error, refresh } = await useAsyncData(
