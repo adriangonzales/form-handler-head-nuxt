@@ -99,7 +99,11 @@ const tabs = computed<TabsItem[]>(() =>
           ? undefined
           : {
               label: String(count),
-              color: value === 'unread' && count > 0 ? 'primary' : 'neutral',
+              // A primary badge would vanish on the primary active tab.
+              color:
+                value === 'unread' && count > 0 && status.value !== 'unread'
+                  ? 'primary'
+                  : 'neutral',
               variant: 'subtle',
               class: 'tabular-nums',
             },
@@ -359,6 +363,7 @@ const emptyText = computed(() =>
           class="w-44"
           icon="i-lucide-arrow-down-up"
         />
+        <EntriesExportButton :form-id="formId" :api-query="apiQuery" />
       </div>
     </div>
 

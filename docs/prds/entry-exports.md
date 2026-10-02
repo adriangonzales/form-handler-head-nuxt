@@ -1,6 +1,6 @@
 # PRD: Entry Exports
 
-**Status:** Planned (milestone 6). The API support is built: signed download URLs and the export index, both from the 2026-10-01 backend changes · **Owner area:** `app/components/entries/ExportButton.vue`, `app/components/exports/ExportList.vue`, `app/pages/exports.vue`, `app/composables/useExport.ts`, `app/composables/useExports.ts`
+**Status:** Built (milestone 6, 2026-10-01) · **Owner area:** `app/components/entries/ExportButton.vue`, `app/components/exports/` (`ExportList`, `ExportStatus`, `ExportActions`), `app/pages/exports.vue`, `app/composables/useExports.ts`, `app/utils/exports.ts`
 
 ## 1. Summary
 
@@ -114,6 +114,8 @@ _API Entries_ FR-8:
 
 - **The export index can't be filtered by form.** The Entries tab filters the first 100 exports client-side (FR-6). A `filter[form]` parameter, or `GET /v1/forms/{form}/entries/exports`, would remove that limit.
 - **Exports don't include the form's name**, only `form_id`. The Exports page joins them against the forms list.
+- **A 403 from the download link can't be detected.** The download is a plain link click, so the dashboard never sees the response. Download re-fetches the export immediately before clicking, so the link is minutes from expiring at worst; FR-4's automatic retry on 403 isn't implemented.
+- **Polling continues while the popover is closed** (but not while the tab is hidden), so the Exports badge and the "Export ready" toast stay current. NFR-3 is met for hidden tabs only.
 - **`parameters` is mistyped in the spec** (`string`, when it's an object holding `filter` and `sort`). `models.ts` overrides it as `Pick<FormEntryQuery, 'filter' | 'sort'>`, because the dashboard reads it for the filter summary and Try again. The override can go once the spec is fixed.
 
 ## 9. Open questions

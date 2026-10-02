@@ -176,14 +176,21 @@ Cross-cutting features:
    - **Spam check timing** (`app.config.ts` → `entries`): 2-minute Checking window, 10 s polling. "Parsing…" for the user agent uses the same window.
    - **Tests:** 106 unit tests and 36 Playwright tests (9 for entries, covering AC-1 to AC-7 and the Checking state).
    - **API notes:** `GET /v1/entries/{id}` doesn't return deleted entries, so Trash shows the list's copy of the row. The local API's queue had no worker during testing, so public submissions stayed Checking and then Not checked; AC-8 with a classifier key hasn't been verified.
-6. **Exports.** Queue, poll, download via the signed link, handling an expired signature or export. A recent-exports popover per form, and the account-wide `/exports` page from the export index.
+6. ✅ **Exports** (built 2026-10-01).
+   - **Entries tab:** **Export CSV** sends the table's filters and sort (never the page or page size) and opens the **Exports** popover, which lists this form's exports from the account's 100 most recent. It warns, with "Export anyway", when the same export is already being prepared. The Exports button shows a badge while any are in progress, and an export started there announces itself with a toast if it finishes while the popover is closed.
+   - **`/exports`:** all recent exports with form name (from the forms list, kept in `useState` for the session and reloaded when an unknown form appears; falls back to the filename), filter summary, requested, status/rows, expiry, and Download / Try again. Page and page size in the URL.
+   - **Polling** (`useExportPolling`): each in-progress export on screen every 2 s, then 10 s after 30 s; paused while the tab is hidden.
+   - **Download** (`useExportActions`) always re-fetches the export for a fresh signed link, then clicks a plain link, so the browser downloads straight from the API. A 404 or past `expires_at` removes the row and offers **Export again**; a not-completed export goes back to polling. A 403 can't be seen from a link click, so it isn't handled; the fresh link makes it unlikely.
+   - **Shared code:** `utils/exports.ts` (filter summary, parameter comparison, poll delay), `ExportList`, `ExportStatus`, `ExportActions`.
+   - **Tests:** 114 unit tests and 41 Playwright tests (5 for exports: the Starred CSV with schema headers and table order, the re-fetch on Download, a faked failure and Try again, expiry, and the Exports page across forms). **The export tests need the API's queue worker** (`php artisan queue:work`).
+   - **API bug found and fixed:** `SendFormEntryAlerts` threw `Call to a member function notifications() on null` when the spam check finished for an entry whose form was deleted. Fixed in the API (`3917b21`, "Handle soft deleted forms"): alerts are skipped for deleted forms.
 7. **Notifications.** CRUD, enable toggle, bounce/error display.
 8. **Account.** Profile, password change (token swapped in the session), delete account.
 9. **Polish and tests.** Empty and error states, accessibility pass, Playwright happy paths for each milestone, and a README.
 
 ## 7. Testing approach
 - **Unit (Vitest):** generated-type guards (`tests/unit/models.test.ts`), token refresh and lock logic, session expiry at `refreshableUntil`, 422 error mapping, schema builder serialisation (array/string rules round-trip, `name` defaulting to the ID), `useListQuery` URL sync, export polling state machine.
-- **E2E (Playwright):** run against a local Laravel on :8001 with a seeded user (`php artisan user:create`, or a test seeder plus `migrate:fresh --seed` before the suite). Flows: login, create form, test submit, entry shows up (Checking…, then checked) and the form's unread count goes up, bulk star, export download (including a stale signature getting re-fetched, and the export listed on `/exports` after a reload), logout.
+- **E2E (Playwright):** run against a local Laravel on :8001, with its queue worker running (exports, spam checks and user agent parsing are queued), and a seeded user (`php artisan user:create`, or a test seeder plus `migrate:fresh --seed` before the suite). Flows: login, create form, test submit, entry shows up (Checking…, then checked) and the form's unread count goes up, bulk star, export download (including a stale signature getting re-fetched, and the export listed on `/exports` after a reload), logout.
 - **CI:** typecheck, lint, unit tests. E2E is optional and runs in a job that boots the PHP API.
 
 ## 8. Open questions
