@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
     // that refresh produced is live (and may be in the browser's cookie by now). Revoke that.
     const refreshed = await refreshCoordinator.refreshedTo(token)
 
-    await useLaravel(event, refreshed?.token ?? token)
+    await useBackend(event, refreshed?.token ?? token)
       .POST('/v1/auth/logout')
       .catch(() => undefined)
   }

@@ -3,20 +3,20 @@ import createClient from 'openapi-fetch'
 import type { paths } from '#shared/types/api'
 
 /**
- * Typed client for the Laravel API, used by the auth routes. Forwards the browser's IP so the API's
+ * Typed client for The Backend's API, used by the auth routes. Forwards the browser's IP so the API's
  * per-IP throttles (login, password reset) apply per user rather than to this server; the API only
  * honours it when this server is listed in its TRUSTED_PROXIES.
  */
-export function useLaravel(event: H3Event, token?: string) {
+export function useBackend(event: H3Event, token?: string) {
   const { apiBase } = useRuntimeConfig(event)
 
   return createClient<paths>({
     baseUrl: apiBase,
-    headers: laravelHeaders(event, token),
+    headers: backendHeaders(event, token),
   })
 }
 
-export function laravelHeaders(event: H3Event, token?: string): Record<string, string> {
+export function backendHeaders(event: H3Event, token?: string): Record<string, string> {
   const headers: Record<string, string> = { Accept: 'application/json' }
   const ip = getRequestIP(event, { xForwardedFor: true })
 
@@ -37,7 +37,7 @@ export function relayApiError(event: H3Event, response: Response, body: unknown)
 
   const retryAfter = response.headers.get('retry-after')
 
-  // Laravel's throttle sends seconds.
+  // The Backend's throttle sends seconds.
   if (retryAfter && Number.isFinite(Number(retryAfter))) {
     setResponseHeader(event, 'Retry-After', Number(retryAfter))
   }

@@ -90,7 +90,7 @@ test('the proxy refuses auth, webhook and traversal paths', async ({ page }) => 
 test('logging out ends the session everywhere it is used', async ({ page }) => {
   await signIn(page)
 
-  await page.getByRole('button', { name: 'E2E Test User' }).click()
+  await page.getByRole('button', { name: credentials.name }).click()
   await page.getByRole('menuitem', { name: 'Log out' }).click()
 
   await expect(page).toHaveURL(/\/login\?reason=signed-out/)

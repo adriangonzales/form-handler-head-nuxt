@@ -1,6 +1,6 @@
 # PRD: App Shell & Architecture
 
-**Status:** Built (milestones 1–2, polished in milestone 9, 2026-10-01) · **Owner area:** `nuxt.config.ts`, `server/api/v1/[...path].ts`, `server/utils/*`, `app/layouts/*`, `app/error.vue`, `app/plugins/api.ts`, `app/assets/css/main.css`, `app/utils/apiErrors.ts`, `shared/types/*`, `scripts/generate-api-types.mjs`
+**Status:** Built (milestones 1–2, polished in milestone 9, 2026-10-01; contract suite, mock backend and CI in milestone 10, 2026-10-03) · **Owner area:** `nuxt.config.ts`, `server/api/v1/[...path].ts`, `server/utils/*`, `app/layouts/*`, `app/error.vue`, `app/plugins/api.ts`, `app/assets/css/main.css`, `app/utils/apiErrors.ts`, `shared/types/*`, `scripts/*`, `tests/contract/`, `tests/mocks/`, `.github/workflows/ci.yml`
 
 ## 1. Summary
 
@@ -83,13 +83,21 @@ This PRD covers the foundation every feature builds on:
 
 **FR-13 Rate limiting.** A 429 shows the API's message, without retrying automatically.
 
+**FR-14 Mock backend and contract tests.**
+
+- `tests/mocks/backend/` implements [the contract](../backend-contract.md) in memory with MSW, typed from the generated types: every endpoint the dashboard uses, including token refresh invalidating the old token, pagination, 422 shapes and the export lifecycle. `pnpm dev:mock` runs the dashboard against it, so frontend work can continue with The Backend offline.
+- `tests/contract/` checks the contract's conventions against any `NUXT_API_BASE`. A new backend is ready for this dashboard when it passes, and when the Playwright suite does.
+- `pnpm test:contract:mock` and `pnpm test:e2e:mock` run each suite against a fresh mock, whatever `.env` says. CI runs `pnpm check` and both, on every push and pull request.
+- The mock, the contract suite and `docs/backend-contract.md` are copies of the Next.js dashboard's. Change them in both projects.
+- **As built (milestone 10):** 46 contract checks and 59 Playwright tests pass against the mock. Against the reference Backend, everything passes except the checks that wait for an export to finish, which need its queue worker. No test skips or branches by backend. The workflow hasn't run on GitHub yet.
+
 ## 5. Non-functional requirements
 
 - **NFR-1 Security:**
   - The JWT never appears in browser-visible responses, `document.cookie` or client JavaScript.
   - Submitted entry data is always rendered as text, never with `v-html`. See [Entries](entries.md) NFR-1.
 - **NFR-2 Typing:** strict TypeScript. `pnpm typecheck` covers `app/`, `server/`, `shared/` and `tests/`.
-- **NFR-3 Quality gate:** `pnpm check` (lint, Prettier check, typecheck, unit and Nuxt tests) passes on every change.
+- **NFR-3 Quality gate:** `pnpm check` (lint, Prettier check, typecheck, unit and Nuxt tests) passes on every change. CI runs it on every push, with the contract and Playwright suites against the mock backend (FR-14).
 - **NFR-4 Accessibility:**
   - Every interactive control can be reached and operated with the keyboard and has an accessible name.
   - Focus moves into modals and returns to the trigger when they close.
@@ -98,6 +106,8 @@ This PRD covers the foundation every feature builds on:
   - Checked by `tests/e2e/accessibility.spec.ts`: an axe scan (WCAG 2.1 A/AA) of every screen in both modes and at 375 px, keyboard-only navigation of the layout, and modal focus.
 - **NFR-5 Responsiveness:** usable down to 375 px wide. Wide tables scroll horizontally inside their container, never the whole page.
 - **NFR-6 Theming:** light and dark mode through Nuxt UI colour mode. Primary colour `indigo`, neutral `zinc` (`app.config.ts`).
+- **NFR-7 Independence:** no code or test names a backend framework. Backend-specific setup lives in the environment (`.env.example`, the README).
+  - **As built (milestone 10):** `tests/unit/backend-independence.test.ts` checks every tracked or new file for framework names (Laravel, artisan, PHP, Eloquent, Symfony, Django). Exempt: `.env.example`, Markdown docs (which describe the reference Backend on purpose), and the types generated from its spec. It found Laravel named in comments, two unit test names and the field editor's help text for custom rules; all now refer to The Backend. `server/utils/laravel.ts` became `server/utils/backend.ts`.
 
 ## 6. Acceptance criteria
 
@@ -107,7 +117,7 @@ This PRD covers the foundation every feature builds on:
 
 ## 7. API dependencies
 
-- Errors use Laravel's shapes: 422 `{message, errors}`, and `{message}` for 401/403/404/409/410/429.
+- Errors use The Backend's shapes: 422 `{message, errors}`, and `{message}` for 401/403/404/409/410/429.
 - Every response is JSON, including errors. Guests are never redirected (_API Auth FR-3_).
 
 ## 8. Open questions

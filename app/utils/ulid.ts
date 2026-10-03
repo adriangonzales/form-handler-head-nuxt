@@ -1,4 +1,4 @@
-// Crockford base32, lowercase like the ULIDs Laravel's HasUlids generates for forms and entries.
+// Crockford base32, lowercase like the ULIDs The Backend generates for forms and entries.
 const alphabet = '0123456789abcdefghjkmnpqrstvwxyz'
 
 export const ulidPattern = /^[0-7][0-9abcdefghjkmnpqrstvwxyz]{25}$/i

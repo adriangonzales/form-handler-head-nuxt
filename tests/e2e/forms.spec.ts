@@ -99,7 +99,7 @@ test('the forms list shows entry, unread and spam counts', async ({ page, reques
 
   const entries = (await (await page.request.get(`/api/v1/forms/${form.id}/entries`)).json()).data
   // Wait out the background spam check, so it can't flip the entries while the test changes them.
-  await page.request.patch(`/api/v1/entries/${entries[0].id}`, {
+  await page.request.put(`/api/v1/entries/${entries[0].id}`, {
     data: { read_at: new Date().toISOString() },
   })
 
@@ -108,7 +108,7 @@ test('the forms list shows entry, unread and spam counts', async ({ page, reques
   await expect(row.getByRole('cell').nth(2)).toHaveText('2')
   await expect(row.getByText('1 unread')).toBeVisible()
 
-  await page.request.patch(`/api/v1/entries/${entries[1].id}`, { data: { spam: true } })
+  await page.request.put(`/api/v1/entries/${entries[1].id}`, { data: { spam: true } })
   await reload(page)
   await expect(row.getByRole('cell').nth(2)).toHaveText('1')
   await expect(row.getByText(/unread/)).toHaveCount(0)

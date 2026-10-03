@@ -60,7 +60,7 @@ export function entryApiFilter(status: EntryStatus, from?: string, to?: string):
   }
 }
 
-/** The API query for the entries list: page, size, sort and Laravel's `filter[…]` parameters. */
+/** The API query for the entries list: page, size, sort and `filter[…]` parameters. */
 export function entryApiQuery(state: ListQueryState<EntryFilter>): Record<string, string | number> {
   const query: Record<string, string | number> = {
     page: state.page,

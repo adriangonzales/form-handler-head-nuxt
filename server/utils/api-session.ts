@@ -69,7 +69,7 @@ export async function startApiSession(event: H3Event, user: User, tokens: TokenS
 }
 
 async function refreshAtApi(event: H3Event, token: string): Promise<TokenSet | null> {
-  const { data, response } = await useLaravel(event, token).POST('/v1/auth/refresh')
+  const { data, response } = await useBackend(event, token).POST('/v1/auth/refresh')
 
   if (response.status === 401) {
     return null

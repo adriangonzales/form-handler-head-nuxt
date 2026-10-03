@@ -31,7 +31,7 @@ export type FormNotification = Schemas['FormNotificationResource']
 export type FormNotificationStoreBody = Schemas['FormNotificationStoreRequest']
 export type FormNotificationUpdateBody = Schemas['FormNotificationUpdateRequest']
 
-/** Laravel's paginated resource collection envelope. */
+/** The Backend's paginated collection envelope. */
 export interface Paginated<T> {
   data: T[]
   links: { first: string | null; last: string | null; prev: string | null; next: string | null }
@@ -47,7 +47,7 @@ export interface Paginated<T> {
   }
 }
 
-/** Laravel's 422 body. */
+/** The Backend's 422 body. */
 export interface ValidationErrorBody {
   message: string
   errors: Record<string, string[]>

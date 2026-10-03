@@ -2,7 +2,7 @@
 
 These documents describe the dashboard for the Headless Form Handler API, as of 2026-10-01. They were updated the same day for the API's page sizes, entry counts, spam classification, `spam_checked_at`, and the export index. They come from [`PLAN.md`](../../PLAN.md) and the API's own PRDs (`../form-handler-headless-laravel/docs/prds`).
 
-They started as forward-looking targets, one milestone each. All nine milestones are now built, and each PRD's **Status** line and requirements describe what was actually built. When a feature changes, update its PRD to match.
+They started as forward-looking targets, one milestone each. All ten milestones are now built, and each PRD's **Status** line and requirements describe what was actually built. When a feature changes, update its PRD to match.
 
 ## Product summary
 
@@ -17,16 +17,16 @@ The API is headless: it stores forms, accepts public submissions, and alerts rec
 
 ## Documents
 
-| PRD                                                         | Scope                                                                                                         | Milestone |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | --------- |
-| [App Shell & Architecture](app-shell-and-architecture.md)   | Nuxt server proxy, configuration, layout, navigation, shared UI behaviour, error handling, API types, tooling | 1, 2, 9   |
-| [Authentication & Session](authentication-and-session.md)   | Login, logout, forgot/reset password, the session cookie, token refresh, route protection                     | 2         |
-| [Forms](forms.md)                                           | Forms list, create, settings, activate/deactivate, delete/restore, duplicate                                  | 3         |
-| [Form Fields & Integration](form-fields-and-integration.md) | Schema builder, embed snippets, test submission                                                               | 4         |
-| [Entries](entries.md)                                       | Entry inbox, filters, detail view, triage, bulk actions, trash                                                | 5         |
-| [Entry Exports](entry-exports.md)                           | Queued CSV export, status polling, signed download, recent exports and the Exports page                       | 6         |
-| [Notifications](notifications.md)                           | Email/SMS alert recipients and delivery errors                                                                | 7         |
-| [Account](account.md)                                       | Profile, password change, account deletion                                                                    | 8         |
+| PRD                                                         | Scope                                                                                                         | Milestone   |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------- |
+| [App Shell & Architecture](app-shell-and-architecture.md)   | Nuxt server proxy, configuration, layout, navigation, shared UI behaviour, error handling, API types, tooling | 1, 2, 9, 10 |
+| [Authentication & Session](authentication-and-session.md)   | Login, logout, forgot/reset password, the session cookie, token refresh, route protection                     | 2           |
+| [Forms](forms.md)                                           | Forms list, create, settings, activate/deactivate, delete/restore, duplicate                                  | 3           |
+| [Form Fields & Integration](form-fields-and-integration.md) | Schema builder, embed snippets, test submission                                                               | 4           |
+| [Entries](entries.md)                                       | Entry inbox, filters, detail view, triage, bulk actions, trash                                                | 5           |
+| [Entry Exports](entry-exports.md)                           | Queued CSV export, status polling, signed download, recent exports and the Exports page                       | 6           |
+| [Notifications](notifications.md)                           | Email/SMS alert recipients and delivery errors                                                                | 7           |
+| [Account](account.md)                                       | Profile, password change, account deletion                                                                    | 8           |
 
 Milestone 9 (polish, accessibility, end-to-end coverage, README) has no PRD of its own. Its requirements are the acceptance criteria and non-functional requirements in each document.
 
@@ -61,6 +61,7 @@ Browser ──(sealed session cookie)──▶ Nuxt / Nitro server ──(Bearer
 | Notification recipients                                                                       | Built (milestone 7)                                                               |
 | Account self-service                                                                          | Built (milestone 8)                                                               |
 | Accessibility (WCAG 2.1 AA scan), end-to-end happy path, README                               | Built (milestone 9)                                                               |
+| Contract suite, mock backend, CI, backend independence check                                  | Built (milestone 10)                                                              |
 | Sign-up                                                                                       | **Not planned.** The API has no registration; accounts are created by an operator |
 | Email verification, MFA                                                                       | **Not planned.** The API doesn't support them                                     |
 

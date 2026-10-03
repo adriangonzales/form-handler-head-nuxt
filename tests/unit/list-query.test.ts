@@ -40,7 +40,7 @@ describe('toRouteQuery', () => {
 })
 
 describe('toApiQuery', () => {
-  it('maps filters to Laravel filter parameters', () => {
+  it('maps filters to filter[…] parameters', () => {
     expect(toApiQuery({ page: 2, perPage: 25, sort: 'name', filter: { active: 'true' } })).toEqual({
       page: 2,
       per_page: 25,

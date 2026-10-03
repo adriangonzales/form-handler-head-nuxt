@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises'
 import { expect, test, type Page } from '@playwright/test'
 import { createFormViaApi, deleteFormViaApi, goto, signIn, uniqueName } from './support'
 
-// These tests need the API's queue worker running (`php artisan queue:work`): exports are built in
+// These tests need The Backend's background workers running (see the README): exports are built in
 // the background.
 
 const created: string[] = []
@@ -62,7 +62,7 @@ test('export the Starred tab, then download a CSV with the schema columns', asyn
     const entry = await addEntry(page, form.id, { name: 'Ana', message })
 
     if (message !== 'Second') {
-      await page.request.patch(`/api/v1/entries/${entry.id}`, { data: { starred: true } })
+      await page.request.put(`/api/v1/entries/${entry.id}`, { data: { starred: true } })
     }
   }
 

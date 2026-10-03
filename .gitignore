@@ -29,3 +29,6 @@ logs
 # Playwright output
 test-results
 playwright-report
+
+# Playwright: the throwaway user global-setup.ts creates for each run
+/playwright/.auth/

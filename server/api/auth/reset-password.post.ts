@@ -10,7 +10,7 @@ const bodySchema = z.object({
 /** Sets a new password from an emailed reset token. The user then signs in again. */
 export default defineEventHandler(async (event) => {
   const body = await readValidatedBody(event, bodySchema.parse)
-  const { data, error, response } = await useLaravel(event).POST('/v1/auth/reset-password', {
+  const { data, error, response } = await useBackend(event).POST('/v1/auth/reset-password', {
     body,
   })
 

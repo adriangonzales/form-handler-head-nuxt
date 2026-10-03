@@ -4,7 +4,7 @@ export interface ApiError {
   /** HTTP status, or 0 when the request never got a response. */
   status: number
   message: string
-  /** Laravel's 422 field errors, keyed by dot path (`settings.honeypot_name`, `ids.3`). */
+  /** The Backend's 422 field errors, keyed by dot path (`settings.honeypot_name`, `ids.3`). */
   errors: Record<string, string[]>
 }
 

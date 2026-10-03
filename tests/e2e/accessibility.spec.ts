@@ -77,7 +77,7 @@ async function seedForm(page: Page) {
     data: { name: 'Bot', email: 'bot@example.com', topic: 'sales' },
   })
 
-  await page.request.patch(`/api/v1/entries/${(await spam.json()).data.id}`, {
+  await page.request.put(`/api/v1/entries/${(await spam.json()).data.id}`, {
     data: { spam: true, spam_score: 0.95, spam_reason: 'Jev classified this entry as spam.' },
   })
 

@@ -9,7 +9,7 @@ const bodySchema = z.object({
 export default defineEventHandler(async (event) => {
   const body = await readValidatedBody(event, bodySchema.parse)
   const { data, error, response } = await withApiToken(event, (token) =>
-    useLaravel(event, token).PATCH('/v1/auth/me', { body }),
+    useBackend(event, token).PATCH('/v1/auth/me', { body }),
   )
 
   if (!data) {

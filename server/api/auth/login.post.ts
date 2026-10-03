@@ -11,7 +11,7 @@ const credentialsSchema = z.object({
  */
 export default defineEventHandler(async (event) => {
   const credentials = await readValidatedBody(event, credentialsSchema.parse)
-  const login = await useLaravel(event).POST('/v1/auth/login', { body: credentials })
+  const login = await useBackend(event).POST('/v1/auth/login', { body: credentials })
 
   if (!login.data) {
     // 422 (wrong credentials) and 429 (throttled) carry messages meant for the login form.
@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const tokens = tokenSetFromResponse(login.data)
-  const me = await useLaravel(event, tokens.token).GET('/v1/auth/me')
+  const me = await useBackend(event, tokens.token).GET('/v1/auth/me')
 
   if (!me.data) {
     throw createError({

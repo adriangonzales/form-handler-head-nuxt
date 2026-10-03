@@ -64,7 +64,7 @@ Entries are submissions to a form. The **Entries** tab is an inbox for one form.
 
 **FR-5 Mark read on open.**
 
-- Opening an unread entry sends `PATCH /v1/entries/{id}` with `read_at` set to now, and updates the row.
+- Opening an unread entry sends `PUT /v1/entries/{id}` with `read_at` set to now, and updates the row.
 - The detail view has **Mark as unread** (`read_at: null`).
 
 **FR-6 Single-entry actions.**

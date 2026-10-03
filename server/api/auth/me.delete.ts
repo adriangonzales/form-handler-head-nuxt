@@ -10,7 +10,7 @@ const bodySchema = z.object({ password: z.string() })
 export default defineEventHandler(async (event) => {
   const { password } = await readValidatedBody(event, bodySchema.parse)
   const { error, response } = await withApiToken(event, (token) =>
-    useLaravel(event, token).DELETE('/v1/auth/me', { params: { query: { password } } }),
+    useBackend(event, token).DELETE('/v1/auth/me', { params: { query: { password } } }),
   )
 
   if (response.status !== 204) {

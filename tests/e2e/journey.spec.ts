@@ -100,7 +100,7 @@ test('from sign-in to export and sign-out', async ({ page }) => {
   })
 
   await test.step('sign out', async () => {
-    await page.getByRole('button', { name: 'E2E Test User' }).click()
+    await page.getByRole('button', { name: credentials.name }).click()
     await page.getByRole('menuitem', { name: 'Log out' }).click()
     await expect(page).toHaveURL(/\/login\?reason=signed-out/)
   })

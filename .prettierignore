@@ -3,6 +3,7 @@
 node_modules
 pnpm-lock.yaml
 shared/types/api.d.ts
+shared/types/openapi.json
 PLAN.md
 BACKEND_PROMPT.md
 test-results

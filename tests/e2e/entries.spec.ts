@@ -94,7 +94,7 @@ test('bulk star reports how many entries changed', async ({ page }) => {
   for (const message of ['One', 'Two', 'Three']) {
     entries.push(await addEntry(page, form.id, { name: 'Sam', message }))
   }
-  await page.request.patch(`/api/v1/entries/${entries[0]!.id}`, { data: { starred: true } })
+  await page.request.put(`/api/v1/entries/${entries[0]!.id}`, { data: { starred: true } })
 
   await goto(page, `/forms/${form.id}/entries`)
   await page.getByRole('checkbox', { name: 'Select all on this page' }).click()
@@ -152,7 +152,7 @@ test('filters and sort survive a reload, and previous/next follow them', async (
     await addEntry(page, form.id, { name: 'Lee', message })
   }
   const read = await addEntry(page, form.id, { name: 'Lee', message: 'Already read' })
-  await page.request.patch(`/api/v1/entries/${read.id}`, {
+  await page.request.put(`/api/v1/entries/${read.id}`, {
     data: { read_at: new Date().toISOString() },
   })
 
@@ -235,7 +235,7 @@ test('a flagged entry shows in Spam with its likelihood, and Not spam moves it b
   await addEntry(page, form.id, { name: 'Real', message: 'Genuine question' })
   const spam = await addEntry(page, form.id, { name: 'Bot', message: 'Cheap SEO backlinks' })
   // What the classifier records for an entry it flags.
-  await page.request.patch(`/api/v1/entries/${spam.id}`, {
+  await page.request.put(`/api/v1/entries/${spam.id}`, {
     data: { spam: true, spam_score: 0.95, spam_reason: 'Jev classified this entry as spam.' },
   })
 

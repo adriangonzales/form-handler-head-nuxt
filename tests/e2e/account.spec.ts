@@ -10,7 +10,7 @@ import {
 } from './support'
 
 // Each test signs in as its own throwaway user, so changing or deleting the account can't affect
-// the shared E2E user. Users still left at the end are deleted.
+// the suite's E2E user. Users still left at the end are deleted.
 const leftovers: { page: Page; account: Account }[] = []
 
 test.afterEach(async () => {

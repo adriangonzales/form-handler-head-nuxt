@@ -42,8 +42,7 @@ Then edit `.env`:
 | `NUXT_SESSION_PASSWORD`             | Seals the session cookie, at least 32 characters. Generated in dev if empty; **required in production**.                                                                    |
 | `NUXT_SESSION_MAX_AGE`              | Session lifetime in seconds. Keep it equal to the API's `JWT_REFRESH_TTL` × 60.                                                                                             |
 | `NUXT_PUBLIC_PASSWORD_REQUIREMENTS` | The password rules shown on the Account page. Match the API's rules for the environment.                                                                                    |
-| `E2E_EMAIL`, `E2E_PASSWORD`         | The account the Playwright tests sign in as.                                                                                                                                |
-| `E2E_API_DIR`                       | The API's directory. The Account tests create throwaway users there with `php artisan user:create`.                                                                         |
+| `E2E_CREATE_USER_CMD`               | A shell command that creates a test user, for the Playwright tests and the contract suite. See [Tests against a backend](#tests-against-a-backend).                         |
 
 There's no sign-up. Create accounts in the API:
 
@@ -67,37 +66,72 @@ php artisan serve
 php artisan queue:work
 ```
 
-| Command          | What it does                                                                |
-| ---------------- | --------------------------------------------------------------------------- |
-| `pnpm check`     | Lint, Prettier check, typecheck and unit tests. Run it before every commit. |
-| `pnpm test`      | Unit tests (Vitest)                                                         |
-| `pnpm test:e2e`  | End-to-end tests (Playwright); see below                                    |
-| `pnpm api:types` | Regenerates `shared/types/api.d.ts` from the API's OpenAPI spec             |
-| `pnpm lint:fix`  | ESLint with fixes                                                           |
-| `pnpm format`    | Prettier                                                                    |
+| Command                   | What it does                                                                    |
+| ------------------------- | ------------------------------------------------------------------------------- |
+| `pnpm dev:mock`           | Development server against the mock backend (no API needed)                     |
+| `pnpm mock:backend`       | Just the mock backend, on `127.0.0.1:8010`                                      |
+| `pnpm check`              | Lint, Prettier check, typecheck and unit tests. Run it before every commit.     |
+| `pnpm test`               | Unit tests (Vitest)                                                             |
+| `pnpm test:contract`      | Checks the API at `NUXT_API_BASE` against the contract                          |
+| `pnpm test:e2e`           | End-to-end tests (Playwright); starts a dev server unless `E2E_BASE_URL` is set |
+| `pnpm test:contract:mock` | The contract suite against a fresh mock backend (no API needed)                 |
+| `pnpm test:e2e:mock`      | The Playwright tests against a fresh mock backend (no API needed)               |
+| `pnpm api:types`          | Regenerates `shared/types/api.d.ts` and `openapi.json` from the API's spec      |
+| `pnpm lint:fix`           | ESLint with fixes                                                               |
+| `pnpm format`             | Prettier                                                                        |
 
 ### API types
 
 Every call to the API is typed from its OpenAPI spec. After the API changes, run `pnpm api:types`, then `pnpm typecheck`: anything the change breaks shows up as a type error. `shared/types/models.ts` gives the generated types short names (`Form`, `FormEntry`, …) and fixes the few places the spec is wrong (listed in `PLAN.md`).
 
-### End-to-end tests
+## Tests against a backend
 
-The Playwright tests run against the real API. Before running them:
+`pnpm test:contract` and the Playwright tests call a real backend. The contract's public checks need only `NUXT_API_BASE`.
 
-1. Start the API and its queue worker (`php artisan serve`, `php artisan queue:work`).
-2. Create the test user in the API, and set `E2E_EMAIL` and `E2E_PASSWORD` in `.env`. The tests expect that user to be named `E2E Test User`.
-3. Install the browser once: `pnpm exec playwright install chromium`.
+The checks that sign in need test users, and the contract has no sign-up endpoint. So `E2E_CREATE_USER_CMD` is a shell command that creates a user, with `{name}`, `{email}` and `{password}` replaced. For the reference API:
+
+```sh
+E2E_CREATE_USER_CMD="cd ../form-handler-headless-laravel && php artisan user:create --name={name} --email={email} --password={password} --no-interaction"
+```
+
+`.env.example` has the equivalent for the mock backend. Tests delete their users afterwards through the API.
+
+Before running the Playwright tests against the reference API, start its server and queue worker (`php artisan serve`, `php artisan queue:work`): exports, spam checks and user-agent parsing are queued. Install the browser once with `pnpm exec playwright install chromium`.
 
 ```bash
 pnpm test:e2e
 pnpm test:e2e tests/e2e/journey.spec.ts   # just the end-to-end happy path
 ```
 
-The suite starts its own dev server on port 3100, with token refresh forced on every request, so it never clashes with `pnpm dev`. Each test creates its own forms and deletes them afterwards.
+The suite starts its own dev server on port 3100 (`E2E_PORT`), with token refresh forced on every request, so it never clashes with `pnpm dev` and the refresh path is always exercised. It creates its own user for the run and deletes it afterwards, and each test creates its own forms and deletes them.
 
 - `journey.spec.ts` walks the happy path through every area, from sign-in to sign-out, using the UI only.
 - `accessibility.spec.ts` scans every screen with axe for WCAG 2.1 AA in light and dark mode and at 375 px wide. It also checks keyboard navigation and modal focus.
 - The other specs cover one area each: auth, forms, fields, entries, exports, notifications, account.
+
+## The mock backend
+
+`tests/mocks/backend/` is an in-memory implementation of [the contract](docs/backend-contract.md), built with MSW and sharing no code with the reference API. It covers every endpoint the dashboard uses. It also has mock-only helpers:
+
+- `POST /__mock/users` creates a user;
+- `POST /__mock/notifications/{id}/bounce` records a delivery problem on a recipient;
+- `GET /__mock/alerts` lists the alerts it has "sent".
+
+`pnpm dev:mock` runs the dashboard against it (port 8010); sign in as `demo@example.com` / `password`.
+
+`pnpm test:contract:mock` and `pnpm test:e2e:mock` run the contract suite and the Playwright tests against a fresh mock on port 8011 (`MOCK_BACKEND_PORT`). They override `.env` where it would point elsewhere, and need no API or test-user command. CI (`.github/workflows/ci.yml`) runs `pnpm check` and both suites this way on every push and pull request. Both suites pass against the mock and against the reference API, which is the evidence that the dashboard depends on the contract rather than on either implementation.
+
+The mock is a copy of the Next.js dashboard's (`../form-handler-head-next/tests/mocks/backend/`), as are the contract suite and `docs/backend-contract.md`. Change them in both projects.
+
+## Using another backend
+
+The dashboard works with any backend that implements [the contract](docs/backend-contract.md). To switch to one:
+
+1. **Check the contract.** Run `NUXT_API_BASE=https://new-backend.example/api pnpm test:contract`. Without a test-user command, only the public checks run (endpoints, guest 401s, error shapes). Set `E2E_CREATE_USER_CMD` to a shell command that creates a user on the new backend, and the signed-in checks run too. Fix the backend until all of them pass.
+2. **Regenerate the types.** Run `API_DOCS_URL=https://new-backend.example/docs/api.json pnpm api:types`, then `pnpm typecheck`. A type error shows where the new spec differs from the old one. `git diff shared/types/api.d.ts` shows the whole change.
+3. **Adapt, if a convention differs.** `docs/backend-contract.md` names the module that relies on each convention. A unit test (`tests/unit/backend-independence.test.ts`) fails if code or tests name a backend framework.
+4. **Configure.** Point `NUXT_API_BASE` and `NUXT_PUBLIC_API_PUBLIC_BASE` at the new backend, and set `NUXT_SESSION_MAX_AGE` and `NUXT_PUBLIC_PASSWORD_REQUIREMENTS` to match its policy. On the backend, set the reset-email link, the trusted proxy and its public origin, as listed under [Deploying](#deploying).
+5. **Run the end-to-end tests** with `pnpm test:e2e`, using the same `E2E_CREATE_USER_CMD`, and with any background workers the backend needs (exports must complete).
 
 ## Project layout
 
@@ -112,7 +146,10 @@ server/
   api/v1/         the authenticated proxy to the API
   utils/          session handling and the shared token refresh
 shared/types/     generated API types and their short names
+scripts/          type generation, the mock backend's server and the wrappers that run tests against it
 tests/unit/       Vitest
+tests/contract/   the backend contract suite (Vitest)
+tests/mocks/      the mock backend
 tests/e2e/        Playwright
 ```
 

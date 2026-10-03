@@ -1,7 +1,7 @@
 import type { H3Event } from 'h3'
 
 /**
- * Authenticated pass-through to the Laravel API: `/api/v1/**` → `{apiBase}/v1/**` with the
+ * Authenticated pass-through to The Backend's API: `/api/v1/**` → `{apiBase}/v1/**` with the
  * session's bearer token. Responses (status and JSON body) are relayed unchanged.
  *
  * Account and auth endpoints are not proxied: they change the session too, so they have their own
@@ -50,7 +50,7 @@ export default defineEventHandler(async (event) => {
 
 function forward(event: H3Event, path: string, token: string, body: string | undefined) {
   const { apiBase } = useRuntimeConfig(event)
-  const headers = laravelHeaders(event, token)
+  const headers = backendHeaders(event, token)
 
   if (body !== undefined) {
     headers['Content-Type'] = getRequestHeader(event, 'content-type') ?? 'application/json'

@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
   const body = await readValidatedBody(event, bodySchema.parse)
   const session = await getUserSession(event)
   const { data, error, response } = await withApiToken(event, (token) =>
-    useLaravel(event, token).PUT('/v1/auth/password', { body }),
+    useBackend(event, token).PUT('/v1/auth/password', { body }),
   )
 
   if (!data) {

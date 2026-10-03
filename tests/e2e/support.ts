@@ -1,14 +1,30 @@
-import { execFileSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 import { expect, type Page } from '@playwright/test'
 import { ulid } from '../../app/utils/ulid'
+import '../support/env'
+import { type Account, createThrowawayUser } from '../support/throwaway-user'
 
-export const credentials = {
-  email: process.env.E2E_EMAIL ?? '',
-  password: process.env.E2E_PASSWORD ?? '',
+export { type Account, createThrowawayUser }
+
+export const e2eUserFile = new URL('../../playwright/.auth/e2e-user.json', import.meta.url).pathname
+
+/** The throwaway user global-setup.ts created for this run, which the suite signs in as. */
+export const credentials: Account = {
+  get name() {
+    return e2eUser().name
+  },
+  get email() {
+    return e2eUser().email
+  },
+  get password() {
+    return e2eUser().password
+  },
 }
 
-if (!credentials.email || !credentials.password) {
-  throw new Error('Set E2E_EMAIL and E2E_PASSWORD (see .env.example) to run the E2E tests.')
+let cached: Account | undefined
+
+function e2eUser(): Account {
+  return (cached ??= JSON.parse(readFileSync(e2eUserFile, 'utf8')))
 }
 
 export async function signIn(page: Page, path = '/forms') {
@@ -19,7 +35,12 @@ export async function signIn(page: Page, path = '/forms') {
   await expect(page).toHaveURL(path)
 }
 
-export const apiPublicBase = process.env.NUXT_PUBLIC_API_PUBLIC_BASE ?? 'http://localhost:8001/api'
+/** The Backend's public API base, which browsers post submissions to. */
+export const apiPublicBase = (
+  process.env.NUXT_PUBLIC_API_PUBLIC_BASE ??
+  process.env.NUXT_API_BASE ??
+  'http://localhost:8001/api'
+).replace(/\/+$/, '')
 
 export interface CreatedForm {
   id: string
@@ -77,42 +98,6 @@ export async function goto(page: Page, url: string) {
 export async function reload(page: Page) {
   await page.reload()
   await hydrated(page)
-}
-
-export interface Account {
-  name: string
-  email: string
-  password: string
-}
-
-const apiDir = process.env.E2E_API_DIR ?? '../form-handler-headless-laravel'
-
-/**
- * Creates a user with the API's `user:create` command, for tests that change or delete the account
- * and so can't use the shared E2E user. Needs the API's code next to this repository (E2E_API_DIR).
- */
-export function createThrowawayUser(prefix = 'Account'): Account {
-  const id = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
-  const account = {
-    name: `${prefix} ${id}`,
-    email: `e2e-${id}@example.com`,
-    password: `Throwaway-${id}-pw!`,
-  }
-
-  execFileSync(
-    'php',
-    [
-      'artisan',
-      'user:create',
-      `--name=${account.name}`,
-      `--email=${account.email}`,
-      `--password=${account.password}`,
-      '--no-interaction',
-    ],
-    { cwd: apiDir, stdio: 'pipe' },
-  )
-
-  return account
 }
 
 export async function signInAs(

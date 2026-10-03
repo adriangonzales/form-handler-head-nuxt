@@ -162,7 +162,7 @@ const presets = [
       </div>
       <UFormField
         label="Other rules"
-        help="Any Laravel validation rule, such as alpha_dash or date. The API doesn't check these until a submission arrives, so a typo fails then."
+        help="Any rule in The Backend's rule syntax, such as alpha_dash or date. The Backend doesn't check these until a submission arrives, so a typo fails then."
       >
         <UInputTags
           v-model="draft.custom"

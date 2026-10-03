@@ -84,7 +84,7 @@ export function toRouteQuery<F extends string>(
   return query
 }
 
-/** The API query for a state: Laravel's `page`, `per_page`, `sort` and `filter[…]`. */
+/** The API query for a state: `page`, `per_page`, `sort` and `filter[…]`. */
 export function toApiQuery<F extends string>(
   state: ListQueryState<F>,
 ): Record<string, string | number> {

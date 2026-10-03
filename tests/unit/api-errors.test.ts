@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { toApiError, toFormErrors } from '../../app/utils/apiErrors'
 
 describe('toApiError', () => {
-  it('reads a Laravel 422 body', () => {
+  it('reads a 422 body', () => {
     const error = {
       statusCode: 422,
       data: {

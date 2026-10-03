@@ -24,7 +24,7 @@ export async function fetchEntry(id: string) {
 
 export async function updateEntry(id: string, body: FormEntryUpdateBody) {
   const response = await useNuxtApp().$api<{ data: FormEntry }>(`/v1/entries/${id}`, {
-    method: 'PATCH',
+    method: 'PUT',
     body,
   })
 
