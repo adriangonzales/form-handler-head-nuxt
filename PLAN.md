@@ -212,6 +212,6 @@ Cross-cutting features:
 ## 8. Open questions
 Resolved on 2026-10-01: the API now has entry, unread and spam counts on the forms list, a `per_page` page size (1–100, default 15) on the forms and entries lists, `spam_checked_at` on entries, and an export index (`GET /v1/entry-exports`).
 
-Decided on 2026-10-02: the export index won't get a form filter or form names (the Entries popover keeps filtering client-side, and `/exports` keeps joining names from the forms list), and email verification isn't planned.
+Decided on 2026-10-02: the export index won't get a form filter or form names (the Entries popover keeps filtering client-side, and `/exports` keeps joining names from the forms list), and email verification isn't planned. Decided on 2026-10-03: exports can't be deleted before they expire.
 
 1. What's the production deploy target for Nuxt (Node server, Vercel, Cloudflare)? It decides the Nitro preset, and whether the in-memory refresh lock needs to become a KV/Redis lock.

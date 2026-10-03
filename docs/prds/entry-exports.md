@@ -115,9 +115,9 @@ _API Entries_ FR-8:
 - **The export index can't be filtered by form.** The Entries tab filters the first 100 exports client-side (FR-6). Adding a form filter to the API isn't planned (decided 2026-10-02).
 - **Exports don't include the form's name**, only `form_id`. The Exports page joins them against the forms list.
 - **A 403 from the download link can't be detected.** The download is a plain link click, so the dashboard never sees the response. Download re-fetches the export immediately before clicking, so the link is minutes from expiring at worst; FR-4's automatic retry on 403 isn't implemented.
+- **Exports can't be deleted before they expire.** Not planned (decided 2026-10-03); they expire after 24 hours.
 - **Polling continues while the popover is closed** (but not while the tab is hidden), so the Exports badge and the "Export ready" toast stay current. NFR-3 is met for hidden tabs only.
 
 ## 9. Open questions
 
-1. Should the API add a form filter to the export index, and include the form name in the export resource?
-2. Should users be able to delete an export before it expires? The API has no delete endpoint.
+None. A form filter and form names on the export index were decided against on 2026-10-02, and deleting an export early on 2026-10-03 (§8).
