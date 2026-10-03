@@ -101,6 +101,27 @@ test('logging out ends the session everywhere it is used', async ({ page }) => {
   await expect(page).toHaveURL(/\/login/)
 })
 
+test('logging out from a copy of the session ends it, even after the browser refreshed', async ({
+  page,
+  context,
+}) => {
+  await signIn(page)
+  const cookies = await context.cookies()
+
+  // Every request refreshes the token in this suite, so this moves the browser past the copy's
+  // token, which the page's own requests could also do at any moment.
+  expect((await page.request.get('/api/v1/forms')).status()).toBe(200)
+
+  const other = await context.browser()!.newContext()
+
+  await other.addCookies(cookies)
+  await other.request.post(`${test.info().project.use.baseURL}/api/auth/logout`)
+  await other.close()
+
+  // The browser's newer token was revoked too.
+  expect((await page.request.get('/api/v1/forms')).status()).toBe(401)
+})
+
 test('forgot password gives the same answer for unknown emails', async ({ page }) => {
   await page.goto('/forgot-password')
   await page.getByLabel('Email').fill('nobody@example.test')

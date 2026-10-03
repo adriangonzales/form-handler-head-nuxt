@@ -40,6 +40,28 @@ export class RefreshCoordinator {
     return this.refreshes.has(token)
   }
 
+  /**
+   * The newest token that `token` was refreshed to by other requests, following up to `maxHops`
+   * refreshes in a row, and waiting for one still in flight; `null` when it wasn't refreshed (or
+   * the refresh was refused or failed). Never refreshes.
+   */
+  async refreshedTo(token: string, maxHops = 3): Promise<TokenSet | null> {
+    let latest: TokenSet | null = null
+
+    for (let hop = 0; hop < maxHops; hop++) {
+      this.prune()
+
+      const entry = this.refreshes.get(latest?.token ?? token)
+      const next = entry ? await entry.result.catch(() => null) : null
+
+      if (!next) break
+
+      latest = next
+    }
+
+    return latest
+  }
+
   refresh(token: string, refreshAtApi: RefreshTokenAtApi): Promise<TokenSet | null> {
     this.prune()
 

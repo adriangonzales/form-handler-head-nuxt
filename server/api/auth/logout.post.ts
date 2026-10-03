@@ -6,8 +6,12 @@ export default defineEventHandler(async (event) => {
   const session = await getUserSession(event)
   const token = session.secure?.token
 
-  if (token && !refreshCoordinator.wasRefreshed(token)) {
-    await useLaravel(event, token)
+  if (token) {
+    // If another request already refreshed this token, the API no longer accepts it, but the token
+    // that refresh produced is live (and may be in the browser's cookie by now). Revoke that.
+    const refreshed = await refreshCoordinator.refreshedTo(token)
+
+    await useLaravel(event, refreshed?.token ?? token)
       .POST('/v1/auth/logout')
       .catch(() => undefined)
   }

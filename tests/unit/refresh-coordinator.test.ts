@@ -77,6 +77,35 @@ describe('RefreshCoordinator', () => {
     expect(await coordinator.refresh('old-token', refreshAtApi)).toEqual(fresh)
   })
 
+  it('tells logout which token other requests refreshed a token to, without refreshing', async () => {
+    const coordinator = new RefreshCoordinator()
+    const second: TokenSet = { token: 'newer-token', expiresAt: 2_000_000 }
+
+    expect(await coordinator.refreshedTo('old-token')).toBeNull()
+
+    await coordinator.refresh('old-token', async () => fresh)
+    expect(await coordinator.refreshedTo('old-token')).toEqual(fresh)
+
+    // The browser moved on again with the new token: follow the chain to the newest one.
+    await coordinator.refresh('new-token', async () => second)
+    expect(await coordinator.refreshedTo('old-token')).toEqual(second)
+
+    // A refused refresh ends the chain where it was.
+    await coordinator.refresh('newer-token', async () => null)
+    expect(await coordinator.refreshedTo('old-token')).toEqual(second)
+  })
+
+  it('waits for a refresh still in flight before naming the newest token', async () => {
+    const coordinator = new RefreshCoordinator()
+    const call = deferred<TokenSet | null>()
+
+    void coordinator.refresh('old-token', () => call.promise)
+    const latest = coordinator.refreshedTo('old-token')
+    call.resolve(fresh)
+
+    expect(await latest).toEqual(fresh)
+  })
+
   it('treats a token as refreshed while its refresh is in flight', () => {
     const coordinator = new RefreshCoordinator()
 
